@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Checklist Rotina Gerencial — Albano Supermercado</title>
+<meta name="theme-color" content="#061764">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --navy:#061764;
+    --navy-2:#0A1F7A;
+    --blue:#0A29B5;
+    --blue-light:#E8EAF8;
+    --green:#1F9D57;
+    --green-light:#E5F6EC;
+    --gold:#C98A1E;
+    --gold-light:#FBF0DD;
+    --gray:#6B7280;
+    --gray-dim:#9AA3B2;
+    --gray-light:#F4F5F8;
+    --border:#E7E9F0;
+    --white:#FFFFFF;
+    --danger:#C4433F;
+    --danger-light:#FBEAEA;
+    --ink:#1B2233;
+    --radius-lg:16px;
+    --radius-md:12px;
+    --radius-sm:8px;
+    --shadow-sm:0 1px 2px rgba(16,24,64,.06), 0 1px 1px rgba(16,24,64,.04);
+    --shadow-md:0 4px 14px rgba(16,24,64,.08), 0 1px 3px rgba(16,24,64,.06);
+    --shadow-lg:0 10px 30px rgba(6,23,100,.16);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--gray-light);
+    color:var(--ink);
+  }
+  svg.ic{ display:block; flex-shrink:0; }
+
+  /* ---------- Header ---------- */
+  header{
+    position:relative;
+    background:
+      radial-gradient(120% 140% at 100% -10%, rgba(255,255,255,.14), transparent 55%),
+      linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 45%,var(--blue) 100%);
+    color:#fff;
+    padding:16px 16px 14px;
+    position:sticky;
+    top:0;
+    z-index:20;
+    box-shadow:0 4px 18px rgba(6,23,100,.28);
+  }
+  header h1{
+    margin:0;
+    font-size:15.5px;
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  header .sub{
+    font-size:11px;
+    opacity:.78;
+    margin-top:1px;
+    letter-spacing:.3px;
+    text-transform:uppercase;
+    font-weight:600;
+  }
+  .header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:11px;
+  }
+  .brand img{
+    width:42px;
+    height:42px;
+    border-radius:11px;
+    box-shadow:0 3px 10px rgba(0,0,0,.3);
+    border:1px solid rgba(255,255,255,.25);
+  }
+
+  .user-chip{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:20px;
+    padding:5px 6px 5px 12px;
+    flex-shrink:0;
+  }
+  .user-chip .uc-label{
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    white-space:nowrap;
+  }
+  .user-chip .uc-role{
+    display:block;
+    font-size:8.5px;
+    font-weight:600;
+    color:rgba(255,255,255,.6);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .user-chip button{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,.14);
+    color:#fff;
+  }
+  .user-chip button:active{ background:rgba(255,255,255,.26); }
+
+  /* ---------- Login screen ---------- */
+  .login-screen{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:
+      radial-gradient(120% 140% at 100% -10%, rgba(255,255,255,.14), transparent 55%),
+      linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 45%,var(--blue) 100%);
+  }
+  .login-card{
+    width:100%;
+    max-width:360px;
+    background:#fff;
+    border-radius:20px;
+    padding:30px 26px 26px;
+    box-shadow:var(--shadow-lg);
+    text-align:center;
+  }
+  .login-card img{
+    width:64px; height:64px;
+    border-radius:15px;
+    box-shadow:0 4px 14px rgba(0,0,0,.18);
+    margin-bottom:14px;
+  }
+  .login-card h2{
+    margin:0 0 2px;
+    font-size:16.5px;
+    font-weight:800;
+    color:var(--ink);
+  }
+  .login-sub{
+    font-size:11.5px;
+    color:var(--gray);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin:0 0 24px;
+  }
+  .login-field{
+    text-align:left;
+    margin-bottom:14px;
+  }
+  .login-field label{
+    display:block;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--gray);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin-bottom:5px;
+  }
+  .login-field select, .login-field input{
+    width:100%;
+    padding:11px 13px;
+    border-radius:10px;
+    border:1.5px solid var(--border);
+    font-size:13.5px;
+    font-family:inherit;
+    font-weight:600;
+    color:var(--ink);
+    background:#fff;
+  }
+  .login-field select:focus, .login-field input:focus{
+    outline:none;
+    border-color:var(--blue);
+  }
+  .login-btn{
+    width:100%;
+    padding:13px;
+    border-radius:11px;
+    border:none;
+    background:linear-gradient(135deg,var(--blue),var(--navy));
+    color:#fff;
+    font-size:14px;
+    font-weight:800;
+    font-family:inherit;
+    margin-top:6px;
+    box-shadow:0 6px 16px rgba(10,41,181,.3);
+  }
+  .login-btn:active{ transform:scale(.98); }
+  .login-error{
+    color:var(--danger);
+    font-size:11.5px;
+    font-weight:700;
+    margin-top:12px;
+    min-height:14px;
+  }
+
+  .id-row{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .id-field{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:var(--radius-sm);
+    padding:7px 10px;
+    min-width:0;
+    backdrop-filter:blur(6px);
+  }
+  .id-field .ic{ color:rgba(255,255,255,.65); }
+  .id-field .id-text{ min-width:0; flex:1; }
+  .id-field label{
+    display:block;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    opacity:.65;
+    margin-bottom:1px;
+    font-weight:600;
+  }
+  .id-field select, .id-field input{
+    width:100%;
+    background:transparent;
+    border:none;
+    color:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    font-family:inherit;
+    padding:0;
+  }
+  .id-field select{ -webkit-appearance:none; appearance:none; }
+  .id-field select option{ color:#111; }
+  .id-field input::placeholder{ color:rgba(255,255,255,.45); font-weight:500; }
+  .id-field:focus-within{ background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.32); }
+
+  .sector-tabs-row{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .sector-tab-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 16px;
+    border-radius:20px;
+    border:2px solid transparent;
+    background:rgba(255,255,255,.16);
+    color:#fff;
+    font-size:12.5px;
+    font-weight:800;
+    font-family:inherit;
+    transition:all .15s ease;
+    box-shadow:0 1px 4px rgba(0,0,0,.12);
+  }
+  .sector-tab-btn .ic{ opacity:1; }
+  .sector-tab-btn:not(.active):not(.disabled):hover{ background:rgba(255,255,255,.26); transform:translateY(-1px); }
+
+  /* Distinct accent per sector */
+  .sector-tab-btn[data-sector="operacional"]{ border-color:rgba(143,180,255,.55); }
+  .sector-tab-btn[data-sector="operacional"].active{
+    background:linear-gradient(135deg,#5B8DFF,#0A29B5);
+    border-color:#5B8DFF;
+    box-shadow:0 4px 14px rgba(10,41,181,.45);
+  }
+  .sector-tab-btn[data-sector="rh_dp"]{ border-color:rgba(240,200,120,.55); }
+  .sector-tab-btn[data-sector="rh_dp"].active{
+    background:linear-gradient(135deg,#FFD37A,var(--gold));
+    color:#3A2600;
+    border-color:#FFD37A;
+    box-shadow:0 4px 14px rgba(201,138,30,.45);
+  }
+  .sector-tab-btn[data-sector="comercial"]{ border-color:rgba(124,224,176,.4); }
+  .sector-tab-btn[data-sector="comercial"].active{
+    background:linear-gradient(135deg,#5FE0A6,var(--green));
+    border-color:#5FE0A6;
+    box-shadow:0 4px 14px rgba(31,157,87,.45);
+  }
+
+  .sector-tab-btn.disabled{
+    opacity:.55;
+    cursor:not-allowed;
+    background:rgba(255,255,255,.08);
+  }
+  .sector-tab-btn .badge-soon{
+    font-size:8.5px;
+    font-weight:800;
+    text-transform:uppercase;
+    background:rgba(255,255,255,.22);
+    padding:2px 7px;
+    border-radius:10px;
+    letter-spacing:.3px;
+  }
+  .sector-tab-btn.active .badge-soon{ background:rgba(0,0,0,.18); color:#fff; }
+
+  .subnav-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+  }
+  .date-picker{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:var(--radius-sm);
+    padding:6px 9px;
+  }
+  .date-picker .ic{ color:rgba(255,255,255,.65); }
+  .date-picker input{
+    background:transparent;
+    border:none;
+    color:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    font-family:inherit;
+  }
+  .date-picker input::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.7;}
+
+  .pill-tabs{
+    display:flex;
+    gap:6px;
+    flex:1;
+    background:rgba(0,0,0,.14);
+    padding:3px;
+    border-radius:10px;
+  }
+  .pill-tabs button{
+    flex:1;
+    padding:7px 4px;
+    border-radius:7px;
+    border:none;
+    background:transparent;
+    color:rgba(255,255,255,.75);
+    font-size:11.5px;
+    font-weight:700;
+    font-family:inherit;
+    transition:all .18s ease;
+  }
+  .pill-tabs button.active{
+    background:#fff;
+    color:var(--navy);
+    box-shadow:0 2px 6px rgba(0,0,0,.18);
+  }
+
+  .progress-wrap{
+    margin-top:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:var(--radius-sm);
+    padding:8px 10px;
+  }
+  .progress-bar-bg{
+    flex:1;
+    background:rgba(255,255,255,.22);
+    border-radius:10px;
+    height:7px;
+    overflow:hidden;
+  }
+  .progress-bar-fill{
+    background:linear-gradient(90deg,#fff,#CFE0FF);
+    height:100%;
+    border-radius:10px;
+    transition:width .35s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-label{
+    font-size:11px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    opacity:.95;
+    white-space:nowrap;
+  }
+  .btn-reset-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    color:#fff;
+    border-radius:8px;
+    width:30px;
+    height:30px;
+    flex-shrink:0;
+    transition:background .15s ease;
+  }
+  .btn-reset-icon:active{ background:rgba(255,255,255,.24); }
+
+  /* ---------- Layout ---------- */
+  main{
+    padding:16px 14px;
+    max-width:640px;
+    margin:0 auto;
+    padding-bottom:150px;
+  }
+
+  /* ---------- Checklist sections ---------- */
+  .section-card{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    margin-bottom:14px;
+    box-shadow:var(--shadow-md);
+    overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:14px 15px;
+    background:linear-gradient(135deg,var(--navy),var(--navy-2));
+    color:#fff;
+    cursor:pointer;
+    user-select:none;
+    transition:filter .15s ease;
+  }
+  .section-head:active{ filter:brightness(1.08); }
+  .section-head .head-left{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    min-width:0;
+  }
+  .section-icon{
+    width:34px;
+    height:34px;
+    min-width:34px;
+    border-radius:10px;
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+  }
+  .section-head .title-block{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+  .section-head .title{
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:.1px;
+  }
+  .section-head .time{
+    font-size:10.5px;
+    opacity:.72;
+    margin-top:1px;
+    font-weight:600;
+  }
+  .section-head .head-right{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-shrink:0;
+  }
+  .section-head .count{
+    font-size:11.5px;
+    font-weight:800;
+    font-variant-numeric:tabular-nums;
+    background:rgba(255,255,255,.16);
+    padding:4px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .section-head .chevron{
+    transition:transform .2s ease;
+    color:rgba(255,255,255,.75);
+    display:flex;
+  }
+  .section-head.collapsed .chevron{transform:rotate(-90deg);}
+
+  .section-body{
+    padding:8px 15px 14px;
+  }
+  .section-body.hidden{display:none;}
+
+  .subheader{
+    font-size:12px;
+    font-weight:800;
+    color:var(--blue);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin:14px 0 6px;
+    padding-bottom:6px;
+    border-bottom:1.5px solid var(--blue-light);
+  }
+  .note{
+    font-size:11.5px;
+    font-style:italic;
+    color:var(--gray);
+    margin:2px 0 8px;
+    line-height:1.4;
+  }
+
+  .check-item{
+    display:flex;
+    align-items:flex-start;
+    gap:11px;
+    padding:9px 3px;
+    border-bottom:1px solid #F1F2F6;
+    cursor:pointer;
+    user-select:none;
+  }
+  .check-item:last-child{border-bottom:none;}
+  .check-item input{ display:none; }
+  .box{
+    width:22px;
+    height:22px;
+    min-width:22px;
+    border-radius:7px;
+    border:2px solid #D3D9E6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:1px;
+    transition:all .15s ease;
+    background:#fff;
+  }
+  .check-item:active .box{ transform:scale(.92); }
+  .check-item input:checked + .box{
+    background:linear-gradient(135deg,var(--green),#178048);
+    border-color:var(--green);
+    box-shadow:0 2px 6px rgba(31,157,87,.35);
+  }
+  .box svg{
+    width:13px;
+    height:13px;
+    opacity:0;
+    transform:scale(.5);
+    transition:all .15s ease;
+  }
+  .check-item input:checked + .box svg{
+    opacity:1;
+    transform:scale(1);
+  }
+  .check-item span.txt{
+    font-size:13.5px;
+    line-height:1.45;
+    padding-top:2px;
+    font-weight:500;
+  }
+  .check-item input:checked ~ span.txt{
+    color:var(--gray-dim);
+    text-decoration:line-through;
+  }
+
+  /* ---------- Sobre ---------- */
+  .info-box{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    padding:4px;
+    box-shadow:var(--shadow-md);
+    border:1px solid var(--border);
+    overflow:hidden;
+  }
+  .info-box-inner{
+    background:linear-gradient(180deg,var(--blue-light),#fff 60%);
+    border-radius:14px;
+    padding:20px 18px;
+  }
+  .info-box .quote-mark{
+    font-size:40px;
+    line-height:1;
+    color:var(--blue);
+    opacity:.25;
+    font-family:Georgia,serif;
+    font-weight:800;
+    margin-bottom:-6px;
+  }
+  .info-box p{
+    margin:0 0 12px;
+    font-size:13px;
+    color:#2A3348;
+    line-height:1.7;
+  }
+  .info-box p:last-of-type{margin-bottom:0;}
+  .info-box .cta-block{
+    text-align:center;
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px dashed #C7D8EE;
+  }
+  .info-box .cta{
+    font-weight:800;
+    color:var(--navy);
+    font-size:13.5px;
+  }
+  .info-box .cta-sub{
+    font-size:11.5px;
+    color:var(--gray);
+    margin-top:5px;
+    font-weight:600;
+  }
+
+  .empty-hint{
+    text-align:center;
+    color:var(--gray);
+    font-size:12.5px;
+    padding:46px 20px;
+    line-height:1.6;
+  }
+  .empty-hint .ic{
+    color:var(--gray-dim);
+    margin:0 auto 14px;
+  }
+
+  /* ---------- Fixed action + nav bars ---------- */
+  .fab-save{
+    position:fixed;
+    left:14px;
+    right:14px;
+    bottom:70px;
+    max-width:612px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    background:linear-gradient(135deg,#22AC63,var(--green));
+    color:#fff;
+    border:none;
+    border-radius:13px;
+    padding:14px;
+    font-size:14px;
+    font-weight:800;
+    font-family:inherit;
+    letter-spacing:.2px;
+    box-shadow:0 8px 20px rgba(31,157,87,.38);
+    z-index:20;
+    transition:transform .1s ease;
+  }
+  .fab-save:active{ transform:scale(.98); }
+
+  .bottom-nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(10px);
+    border-top:1px solid var(--border);
+    display:flex;
+    z-index:20;
+    padding:6px 8px env(safe-area-inset-bottom);
+    box-shadow:0 -6px 18px rgba(16,24,64,.06);
+  }
+  .nav-btn{
+    flex:1;
+    border:none;
+    background:none;
+    font-family:inherit;
+    padding:6px 2px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    color:var(--gray-dim);
+    font-size:10px;
+    font-weight:700;
+  }
+  .nav-btn .nav-ic-wrap{
+    width:34px;
+    height:26px;
+    border-radius:9px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .18s ease;
+  }
+  .nav-btn.active{ color:var(--blue); }
+  .nav-btn.active .nav-ic-wrap{ background:var(--blue-light); }
+
+  .toast{
+    position:fixed;
+    bottom:126px;
+    left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:var(--ink);
+    color:#fff;
+    padding:11px 20px;
+    border-radius:30px;
+    font-size:12.5px;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition:all .25s ease;
+    z-index:30;
+    white-space:nowrap;
+    max-width:90vw;
+    text-overflow:ellipsis;
+    overflow:hidden;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  /* ---------- History ---------- */
+  .filter-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .filter-row select{
+    flex:1;
+    padding:10px 10px;
+    border-radius:var(--radius-sm);
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    font-family:inherit;
+    color:var(--ink);
+    box-shadow:var(--shadow-sm);
+  }
+  .hist-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:13px 14px;
+    margin-bottom:10px;
+    box-shadow:var(--shadow-sm);
+    display:flex;
+    gap:12px;
+  }
+  .hist-icon{
+    width:38px;
+    height:38px;
+    min-width:38px;
+    border-radius:10px;
+    background:var(--blue-light);
+    color:var(--blue);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hist-body{ flex:1; min-width:0; }
+  .hist-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .hist-tipo{
+    font-size:9.5px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    color:var(--blue);
+    background:var(--blue-light);
+    padding:2px 8px;
+    border-radius:20px;
+    display:inline-block;
+  }
+  .hist-loja{
+    font-size:14px;
+    font-weight:800;
+    margin-top:5px;
+    color:var(--ink);
+  }
+  .hist-meta{
+    font-size:11px;
+    color:var(--gray);
+    margin-top:2px;
+    font-weight:500;
+  }
+  .hist-pct{
+    font-size:18px;
+    font-weight:800;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  .hist-pct.good{ color:var(--green); }
+  .hist-pct.mid{ color:var(--gold); }
+  .hist-pct.bad{ color:var(--danger); }
+  .hist-pendentes{
+    margin-top:9px;
+    padding-top:9px;
+    border-top:1px solid #F1F2F6;
+    font-size:11.5px;
+    color:var(--gray);
+    line-height:1.5;
+  }
+  .hist-pendentes strong{ color:var(--ink); }
+
+  /* ---------- Dashboard ---------- */
+  .stat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stat-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:14px;
+    box-shadow:var(--shadow-sm);
+  }
+  .stat-icon{
+    width:32px;
+    height:32px;
+    border-radius:9px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:10px;
+  }
+  .stat-card .val{
+    font-size:21px;
+    font-weight:800;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+    line-height:1.15;
+  }
+  .stat-card .lbl{
+    font-size:10.5px;
+    color:var(--gray);
+    margin-top:3px;
+    font-weight:600;
+    line-height:1.4;
+  }
+  .chart-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:var(--shadow-sm);
+  }
+  .chart-card h3{
+    margin:0 0 14px;
+    font-size:12.5px;
+    font-weight:800;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .chart-card h3 .ic{ color:var(--blue); }
+  .pending-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .pending-list li{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:9px 0;
+    border-bottom:1px solid #F1F2F6;
+    font-size:12.5px;
+    font-weight:500;
+  }
+  .pending-list li:last-child{border-bottom:none;}
+  .pending-rank{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    border-radius:5px;
+    background:var(--gray-light);
+    color:var(--gray);
+    font-size:10px;
+    font-weight:800;
+    margin-right:8px;
+  }
+  .pending-count{
+    background:var(--danger-light);
+    color:var(--danger);
+    font-size:10.5px;
+    font-weight:800;
+    padding:3px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+
+  /* ---------- PDF / print ---------- */
+  #printArea{ display:none; }
+  @media print{
+    body > *:not(#printArea){ display:none !important; }
+    #printArea{ display:block !important; }
+  }
+
+  /* ---------- Config (Diretor) ---------- */
+  .hist-pdf-btn{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    margin-top:8px;
+    padding:6px 11px;
+    border-radius:20px;
+    border:1px solid var(--border);
+    background:var(--gray-light);
+    color:var(--gray);
+    font-size:11px;
+    font-weight:700;
+    font-family:inherit;
+  }
+  .hist-pdf-btn:active{ background:var(--blue-light); color:var(--blue); }
+
+  .cfg-section{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:18px;
+    margin-bottom:16px;
+    box-shadow:var(--shadow-sm);
+  }
+  .cfg-heading{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:0 0 14px;
+    font-size:14px;
+    font-weight:800;
+    color:var(--navy);
+  }
+  .cfg-hint{
+    font-size:11.5px;
+    color:var(--gray);
+    margin:0 0 6px;
+    font-weight:600;
+  }
+  .cfg-row{ margin-bottom:16px; }
+  .cfg-row input, .cfg-gerente-row input{
+    width:100%;
+    padding:10px 12px;
+    border-radius:9px;
+    border:1.5px solid var(--border);
+    font-size:13px;
+    font-family:inherit;
+    font-weight:600;
+    color:var(--ink);
+    background:#fff;
+  }
+  .cfg-row input:focus, .cfg-gerente-row input:focus{ outline:none; border-color:var(--blue); }
+  .cfg-gerente-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:9px;
+    align-items:center;
+  }
+  .cfg-gerente-row .cfg-loja-input{ flex:1.3; }
+  .cfg-gerente-row .cfg-pass-input{ flex:1; }
+  .cfg-del-btn, .cfg-item-del{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:36px; height:36px;
+    min-width:36px;
+    border-radius:9px;
+    border:1.5px solid var(--danger-light);
+    background:var(--danger-light);
+    color:var(--danger);
+  }
+  .cfg-item-del{ width:30px; height:30px; min-width:30px; border-radius:7px; }
+  .cfg-add-btn, .cfg-item-add, .cfg-add-section-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 14px;
+    border-radius:9px;
+    border:1.5px dashed #C7D2E0;
+    background:var(--gray-light);
+    color:var(--blue);
+    font-size:12px;
+    font-weight:700;
+    font-family:inherit;
+    margin-top:2px;
+  }
+  .cfg-item-add{ padding:6px 11px; font-size:11px; margin:6px 0 14px; }
+  .cfg-add-section-btn{ width:100%; justify-content:center; }
+  .cfg-save-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:12px;
+    border-radius:11px;
+    border:none;
+    background:linear-gradient(135deg,#22AC63,var(--green));
+    color:#fff;
+    font-size:13.5px;
+    font-weight:800;
+    font-family:inherit;
+    margin-top:16px;
+  }
+  .cfg-save-btn:active{ transform:scale(.99); }
+
+  .cfg-tipo-tabs{
+    display:flex;
+    gap:6px;
+    background:var(--gray-light);
+    padding:3px;
+    border-radius:10px;
+    margin-bottom:16px;
+  }
+  .cfg-tipo-btn{
+    flex:1;
+    padding:8px 4px;
+    border-radius:7px;
+    border:none;
+    background:transparent;
+    color:var(--gray);
+    font-size:12px;
+    font-weight:700;
+    font-family:inherit;
+  }
+  .cfg-tipo-btn.active{ background:#fff; color:var(--navy); box-shadow:var(--shadow-sm); }
+
+  .cfg-cs-card{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:14px;
+    background:var(--gray-light);
+  }
+  .cfg-section-title{
+    width:100%;
+    padding:9px 11px;
+    border-radius:8px;
+    border:1.5px solid var(--blue-light);
+    background:#fff;
+    font-size:13px;
+    font-weight:800;
+    color:var(--navy);
+    font-family:inherit;
+    margin-bottom:10px;
+  }
+  .cfg-group-block{ margin-bottom:6px; }
+  .cfg-group-sub{
+    width:100%;
+    padding:7px 10px;
+    border-radius:7px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--blue);
+    font-family:inherit;
+    margin-bottom:6px;
+  }
+  .cfg-item-row{
+    display:flex;
+    gap:6px;
+    margin-bottom:6px;
+    align-items:center;
+  }
+  .cfg-item-text{
+    flex:1;
+    padding:8px 10px;
+    border-radius:7px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:12.5px;
+    font-family:inherit;
+    color:var(--ink);
+  }
+  .cfg-item-text:focus, .cfg-group-sub:focus, .cfg-section-title:focus{ outline:none; border-color:var(--blue); }
+
+  /* ---------- Sidebar brand (desktop only) ---------- */
+  .sidebar-brand{ display:none; }
+  .sidebar-foot{ display:none; }
+  .sidebar-user{ display:none; }
+
+  /* ================================================================
+     DESKTOP / WIDE SCREEN LAYOUT
+     ================================================================ */
+  @media (min-width: 860px){
+    :root{ --sidebar-w:268px; }
+
+    header{
+      margin-left:var(--sidebar-w);
+      padding:22px 44px 24px;
+    }
+    header .brand{ display:none; }
+    header .header-row{ justify-content:flex-end; }
+
+    .sector-tabs-row{ max-width:1100px; margin-top:0; }
+    .sector-tab-btn{ font-size:13px; padding:9px 16px; }
+
+    .id-row{ max-width:1100px; margin-top:14px; gap:16px; }
+    .id-field{
+      padding:13px 17px;
+      border-radius:13px;
+      gap:12px;
+      background:rgba(255,255,255,.12);
+    }
+    .id-field .ic{
+      width:36px; height:36px;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(255,255,255,.14);
+      border-radius:10px;
+      color:#fff;
+    }
+    .id-field label{ font-size:10.5px; letter-spacing:.6px; opacity:.7; }
+    .id-field select, .id-field input{ font-size:16px; font-weight:700; }
+    .id-field .ic svg{ width:19px; height:19px; }
+
+    .subnav-row{ max-width:1100px; margin-top:14px; gap:12px; }
+    .pill-tabs{ padding:4px; border-radius:12px; }
+    .pill-tabs button{ font-size:13.5px; padding:10px 8px; border-radius:9px; }
+    .date-picker{ padding:9px 14px; border-radius:11px; flex-shrink:0; }
+    .date-picker input{ font-size:14px; }
+
+    .progress-wrap{ max-width:1100px; margin-top:16px; padding:11px 14px; border-radius:11px; }
+    .btn-reset-icon{ width:36px; height:36px; border-radius:10px; }
+    .progress-label{ font-size:12.5px; }
+
+    main{
+      margin-left:var(--sidebar-w);
+      max-width:1500px;
+      padding:26px 40px 100px;
+    }
+
+    .section-card{ border-radius:18px; margin-bottom:18px; }
+    .section-head{ padding:18px 22px; }
+    .section-icon{ width:40px; height:40px; border-radius:12px; }
+    .section-icon svg{ width:21px; height:21px; }
+    .section-head .title{ font-size:15.5px; }
+    .section-head .time{ font-size:11.5px; }
+    .section-head .count{ font-size:12.5px; padding:5px 12px; }
+    .section-body{ padding:10px 22px 18px; }
+    .subheader{ font-size:12.5px; margin:18px 0 8px; }
+    .check-item{ padding:11px 4px; }
+    .check-item span.txt{ font-size:14.5px; }
+    .box{ width:23px; height:23px; border-radius:7px; }
+
+    .info-box-inner{ padding:34px 40px; }
+    .info-box p{ font-size:14px; max-width:760px; }
+    .info-box .cta{ font-size:15px; }
+
+    .stat-grid{ grid-template-columns:repeat(4,1fr); gap:14px; }
+    .stat-card{ padding:18px; border-radius:14px; }
+    .stat-card .val{ font-size:26px; }
+    .stat-card .lbl{ font-size:11.5px; }
+    .chart-card{ padding:22px 24px; border-radius:14px; }
+    .chart-card h3{ font-size:13.5px; }
+    .hist-card{ padding:16px 18px; border-radius:14px; }
+    .hist-loja{ font-size:15px; }
+    .hist-pct{ font-size:20px; }
+
+    .fab-save{
+      left:calc(var(--sidebar-w) + 40px);
+      right:40px;
+      max-width:1420px;
+      bottom:28px;
+      padding:16px;
+      font-size:14.5px;
+      border-radius:14px;
+    }
+
+    .toast{ bottom:88px; }
+
+    /* Sidebar navigation replaces bottom tab bar */
+    .bottom-nav{
+      top:0;
+      bottom:0;
+      left:0;
+      right:auto;
+      width:var(--sidebar-w);
+      flex-direction:column;
+      align-items:stretch;
+      justify-content:flex-start;
+      gap:6px;
+      padding:26px 16px 18px;
+      border-top:none;
+      border-right:none;
+      box-shadow:6px 0 28px rgba(6,23,100,.22);
+      backdrop-filter:none;
+      background:
+        radial-gradient(85% 42% at 85% 0%, rgba(201,138,30,.35), transparent 62%),
+        radial-gradient(140% 60% at 0% 0%, rgba(255,255,255,.14), transparent 60%),
+        linear-gradient(200deg,var(--navy) 0%,var(--navy-2) 55%,var(--blue) 130%);
+    }
+    .sidebar-brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:8px 8px 24px;
+      margin-bottom:16px;
+      border-bottom:1px solid rgba(255,255,255,.16);
+    }
+    .sidebar-brand img{
+      width:56px; height:56px; border-radius:15px;
+      box-shadow:0 6px 18px rgba(0,0,0,.35);
+      border:2px solid rgba(255,255,255,.3);
+    }
+    .sidebar-brand .sb-title{ font-size:18px; font-weight:900; color:#fff; letter-spacing:.1px; line-height:1.15; }
+    .sidebar-brand .sb-sub{ font-size:11px; color:#F0C878; font-weight:800; text-transform:uppercase; letter-spacing:.6px; margin-top:3px; }
+
+    .nav-section-label{
+      font-size:9.5px;
+      font-weight:800;
+      color:rgba(255,255,255,.4);
+      text-transform:uppercase;
+      letter-spacing:.8px;
+      padding:0 12px;
+      margin:2px 0 8px;
+    }
+
+    .nav-btn{
+      position:relative;
+      flex-direction:row;
+      justify-content:flex-start;
+      align-items:center;
+      gap:13px;
+      padding:13px 14px;
+      border-radius:13px;
+      font-size:13.5px;
+      font-weight:700;
+      color:rgba(255,255,255,.68);
+      transition:background .16s ease, color .16s ease, transform .12s ease;
+    }
+    .nav-btn:hover{ background:rgba(255,255,255,.09); color:#fff; transform:translateX(2px); }
+    .nav-btn .nav-ic-wrap{
+      width:36px; height:36px;
+      background:rgba(255,255,255,.10);
+      border-radius:10px;
+      transition:background .16s ease, color .16s ease;
+    }
+    .nav-btn[data-view="checklist"] .nav-ic-wrap{ color:#8FB4FF; }
+    .nav-btn[data-view="historico"] .nav-ic-wrap{ color:#F0C878; }
+    .nav-btn[data-view="dashboard"] .nav-ic-wrap{ color:#7CE0B0; }
+    .nav-btn[data-view="sobre"] .nav-ic-wrap{ color:#C9B8FF; }
+    .nav-btn[data-view="config"] .nav-ic-wrap{ color:#FF9F6B; }
+    .nav-btn.active{
+      background:#fff;
+      color:var(--navy);
+      box-shadow:0 6px 16px rgba(0,0,0,.22);
+    }
+    .nav-btn.active .nav-ic-wrap{ background:var(--blue-light); color:var(--blue) !important; }
+    .nav-btn.active::before{ content:none; }
+
+    .sidebar-user{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      margin-top:auto;
+      padding:12px;
+      border-radius:13px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .sidebar-user .su-avatar{
+      width:36px; height:36px;
+      min-width:36px;
+      border-radius:10px;
+      background:linear-gradient(135deg,#F0C878,var(--gold));
+      display:flex; align-items:center; justify-content:center;
+      color:var(--navy);
+      font-weight:900;
+      font-size:14px;
+    }
+    .sidebar-user .su-name{ font-size:12.5px; font-weight:800; color:#fff; line-height:1.25; }
+    .sidebar-user .su-role{ font-size:10px; font-weight:700; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:.3px; }
+
+    .sidebar-foot{
+      display:block;
+      padding:12px 12px 0;
+      font-size:9.5px;
+      color:rgba(255,255,255,.35);
+      font-weight:600;
+      text-align:center;
+    }
+  }
+
+  @media (min-width: 1820px){
+    header{ padding-left:calc((100vw - var(--sidebar-w) - 1500px) / 2 + 40px); }
+    main{ padding-left:calc((100vw - var(--sidebar-w) - 1500px) / 2 + 40px); padding-right:calc((100vw - var(--sidebar-w) - 1500px) / 2 + 40px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="logo.png" alt="Albano Supermercado">
+    <h2>Checklist Rotina Gerencial</h2>
+    <p class="login-sub">Albano Supermercado</p>
+    <div class="login-field">
+      <label>Perfil de acesso</label>
+      <select id="loginRoleSelect"></select>
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="loginPassword" placeholder="Digite sua senha">
+    </div>
+    <button class="login-btn" id="loginBtn">Entrar</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<div id="appShell" style="display:none;">
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <img src="logo.png" alt="Albano Supermercado">
+      <div>
+        <h1>Checklist Rotina Gerencial</h1>
+        <div class="sub">Albano Supermercado</div>
+      </div>
+    </div>
+    <div class="user-chip" id="userChip">
+      <span class="uc-label">
+        <span id="ucLabelText"></span>
+        <span class="uc-role" id="ucRoleText"></span>
+      </span>
+      <button id="btnLogout" title="Sair"></button>
+    </div>
+  </div>
+
+  <div class="sector-tabs-row" id="sectorTabsRow"></div>
+
+  <div class="id-row" id="idRow">
+    <div class="id-field">
+      <span class="ic" id="icStore"></span>
+      <div class="id-text">
+        <label>Loja</label>
+        <select id="lojaSelect"></select>
+      </div>
+    </div>
+    <div class="id-field">
+      <span class="ic" id="icUser"></span>
+      <div class="id-text">
+        <label>Auditor / Gerente</label>
+        <input type="text" id="auditorInput" placeholder="Seu nome">
+      </div>
+    </div>
+  </div>
+
+  <div class="subnav-row" id="subnavRow">
+    <div class="pill-tabs" id="pillTabsWrap"></div>
+    <div class="date-picker" id="datePickerWrap">
+      <span class="ic" id="icCalendar"></span>
+      <input type="date" id="dateInput">
+    </div>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <button class="btn-reset-icon" id="btnReset" title="Reiniciar checklist"></button>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="progress-label" id="progressPct">0%</span>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<button class="fab-save" id="btnSave"></button>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom-nav" id="bottomNav">
+  <div class="sidebar-brand">
+    <img src="logo.png" alt="Albano Supermercado">
+    <div>
+      <div class="sb-title">Checklist Gerencial</div>
+      <div class="sb-sub">Albano Supermercado</div>
+    </div>
+  </div>
+  <button class="nav-btn active" data-view="checklist"><span class="nav-ic-wrap" data-ic="checklist"></span>Checklist</button>
+  <button class="nav-btn" data-view="historico"><span class="nav-ic-wrap" data-ic="history"></span>Histórico</button>
+  <button class="nav-btn" data-view="dashboard"><span class="nav-ic-wrap" data-ic="dashboard"></span>Dashboard</button>
+  <button class="nav-btn" data-view="sobre"><span class="nav-ic-wrap" data-ic="info"></span>Sobre</button>
+  <button class="nav-btn" data-view="config" id="navConfig" style="display:none;"><span class="nav-ic-wrap" data-ic="settings"></span>Configurações</button>
+  <div class="sidebar-user" id="sidebarUser">
+    <div class="su-avatar" id="suAvatar"></div>
+    <div>
+      <div class="su-name" id="suName"></div>
+      <div class="su-role" id="suRole"></div>
+    </div>
+  </div>
+  <div class="sidebar-foot">Falcioni Consultoria</div>
+</nav>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+/* ---------- Icon set (stroke-based, currentColor) ---------- */
+const ICON_PATHS = {
+  checklist: '<path d="M9 4.5H7a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6.5a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/>',
+  history: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6M5 5l1.5 1.5M19 5l-1.5 1.5"/>',
+  dashboard: '<path d="M3 21V3M3 21h18"/><rect x="6.5" y="13" width="3" height="6" rx=".5"/><rect x="11.5" y="8" width="3" height="11" rx=".5"/><rect x="16.5" y="4.5" width="3" height="14.5" rx=".5"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r="0.9" fill="currentColor" stroke="none"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M16 3v4M8 3v4M3.5 10h17"/>',
+  undo: '<path d="M4 9.5h10.5a5.5 5.5 0 0 1 0 11H12"/><path d="M4 9.5 8.5 5M4 9.5 8.5 14"/>',
+  store: '<path d="M3.5 9 4.7 4h14.6l1.2 5"/><path d="M4.2 9v9.5a1 1 0 0 0 1 1h13.6a1 1 0 0 0 1-1V9"/><path d="M9.5 19.5V14h5v5.5"/><path d="M3.5 9c.2 1.4 1.4 2.4 2.7 2.4s2.5-1 2.7-2.4c.2 1.4 1.4 2.4 2.7 2.4s2.5-1 2.7-2.4c.2 1.4 1.4 2.4 2.7 2.4S19.8 10.4 20 9"/>',
+  user: '<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6"/>',
+  check: '<path d="M4 12.5 9.5 18 20 6"/>',
+  sunrise: '<path d="M12 3v5"/><path d="M5 10.5 6.6 12M19 10.5 17.4 12"/><path d="M2.5 18h19"/><path d="M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M2 21h20" opacity="0"/>',
+  doorEnter: '<rect x="13.5" y="3" width="6.5" height="18" rx="1.2"/><path d="M11 12H3.5"/><path d="M7 8.2 3.2 12l3.8 3.8"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/>',
+  sunset: '<path d="M12 10.5V6"/><path d="M5 12.5 6.6 11M19 12.5 17.4 11"/><path d="M2.5 18h19"/><path d="M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M9 15.5l3-3 3 3"/>',
+  moon: '<path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.8 6.8 0 0 0 10.2 10.2z"/>',
+  users: '<circle cx="8.5" cy="8" r="3.1"/><path d="M2.5 19.5c0-3.3 2.7-5.3 6-5.3s6 2 6 5.3"/><circle cx="16.5" cy="8.6" r="2.5"/><path d="M15.3 14.3c2.8.2 5 2.1 5 5.2"/>',
+  building: '<rect x="4.5" y="3" width="15" height="18" rx="1"/><path d="M9 7.5h.01M15 7.5h.01M9 11.5h.01M15 11.5h.01M9 15.5h.01M15 15.5h.01"/>',
+  layers: '<path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 13l9 5 9-5"/><path d="M3 17.5l9 5 9-5"/>',
+  trendUp: '<path d="M3 17l6-6.5 4 4L21 6"/><path d="M15 6h6v6"/>',
+  alert: '<path d="M12 2.5 22 20.5H2Z"/><path d="M12 9.5v5"/><path d="M12 17.7h.01"/>',
+  award: '<circle cx="12" cy="8.5" r="5.5"/><path d="M8.2 13 6.5 21l5.5-3 5.5 3-1.7-8"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3.2 2"/>',
+  box: '<path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5v-9Z"/><path d="M3.7 7.3 12 12l8.3-4.7M12 12v9"/>',
+  inbox: '<path d="M3.5 12h5l1.6 3h4l1.6-3h5"/><path d="M6 5h12l3 7v7a1.4 1.4 0 0 1-1.4 1.4H4.4A1.4 1.4 0 0 1 3 19v-7l3-7Z"/>',
+  chartEmpty: '<path d="M4 20V9M10 20V4M16 20v-7M22 20H2"/>',
+  logout: '<path d="M15 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-4"/><path d="M11 12H3.5"/><path d="M7.5 8 3.5 12l4 4"/>',
+  settings: '<circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.6M12 18.4V21M21 12h-2.6M5.6 12H3M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8M18.4 18.4l-1.8-1.8M7.4 7.4 5.6 5.6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  trash: '<path d="M4 7h16"/><path d="M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7"/><path d="M6 7l1 13a1.5 1.5 0 0 0 1.5 1.4h7a1.5 1.5 0 0 0 1.5-1.4L18 7"/><path d="M10 11v6M14 11v6"/>',
+  printer: '<path d="M6 9V4h12v5"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M6 15h12v6H6z"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12 20 3M17 6l2.5 2.5M14.5 8.5 17 11"/>'
+};
+function icon(name, size, strokeW){
+  size = size || 20;
+  strokeW = strokeW || 2;
+  return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeW}" stroke-linecap="round" stroke-linejoin="round">${ICON_PATHS[name] || ""}</svg>`;
+}
+function chevronIcon(){
+  return `<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+}
+
+const STORAGE_PREFIX = "checklist_albano_";
+
+const DEFAULT_APP_CONFIG = {
+  diretorPassword: "diretor2026",
+  gerentes: [
+    { id: "matriz_barro", loja: "Matriz Barro", password: "matriz123" },
+    { id: "filial_barro", loja: "Filial Barro", password: "filialbarro123" },
+    { id: "filial_lavras", loja: "Filial Lavras da Mangabeira", password: "lavras123" }
+  ]
+};
+
+function loadAppConfig(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "app_config"));
+    if (saved && Array.isArray(saved.gerentes) && saved.gerentes.length) return saved;
+  } catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_APP_CONFIG));
+}
+function saveAppConfig(){ localStorage.setItem(STORAGE_PREFIX + "app_config", JSON.stringify(APP_CONFIG)); }
+
+function buildRoles(){
+  return [
+    ...APP_CONFIG.gerentes.map(g => ({ id: g.id, role: "gerente", loja: g.loja, password: g.password, label: "Gestor — " + g.loja })),
+    { id: "diretor", role: "diretor", loja: null, password: APP_CONFIG.diretorPassword, label: "Diretor" }
+  ];
+}
+function refreshConfigDerived(){
+  LOJAS = APP_CONFIG.gerentes.map(g => g.loja);
+  ROLES = buildRoles();
+}
+
+let APP_CONFIG = loadAppConfig();
+let LOJAS = APP_CONFIG.gerentes.map(g => g.loja);
+let ROLES = buildRoles();
+
+const SECTOR_LIST = ["operacional", "rh_dp", "comercial"];
+const SECTOR_META = {
+  operacional: { label: "Rotina Operacional", short: "Operacional", tipos: ["diario","semanal","mensal"], icon: "checklist", ready: true },
+  rh_dp: { label: "Rotina RH/DP", short: "RH / DP", tipos: ["mensal"], icon: "users", ready: true },
+  comercial: { label: "Rotina Comercial", short: "Comercial", tipos: ["mensal"], icon: "trendUp", ready: false }
+};
+let currentSector = localStorage.getItem(STORAGE_PREFIX + "current_sector") || "operacional";
+if (!SECTOR_META[currentSector]) currentSector = "operacional";
+
+const DEFAULT_DATA = {
+ operacional: {
+  diario: [
+    {
+      id: "manha", title: "Rotina da Manhã", time: "6h40min", icon: "sunrise",
+      groups: [
+        { sub: "Abertura Física da Loja", items: [
+          "Ligar iluminação da loja e setores.",
+          "Ligar equipamentos necessários ao funcionamento.",
+          "Ligar aparelhos de ar-condicionado.",
+          "Verificar funcionamento dos equipamentos."
+        ]},
+        { sub: "Conferências Operacionais", items: [
+          "Conferir temperatura das geladeiras.",
+          "Conferir temperatura das ilhas refrigeradas.",
+          "Registrar e comunicar qualquer irregularidade.",
+          "Verificar produtos críticos e possíveis riscos de perda."
+        ]},
+        { sub: "Processos Comerciais", items: [
+          "Puxar atualização de preços.",
+          "Conferir alterações pendentes.",
+          "Liberar lotes no sistema.",
+          "Verificar divergências de preços."
+        ]},
+        { sub: "Gestão da Equipe — 6h55min", note: "Nesta reunião, abordar por exemplo:", items: [
+          "Realizar reunião matinal.",
+          "Metas do dia.",
+          "Promoções vigentes.",
+          "Campanhas.",
+          "Pontos de atenção.",
+          "Organização.",
+          "Atendimento ao cliente.",
+          "Motivação da equipe."
+        ]}
+      ]
+    },
+    {
+      id: "abertura", title: "Abertura da Loja", time: "7h00min", icon: "doorEnter",
+      groups: [
+        { sub: "Vistoria Inicial dos Setores", note: "Realizar passagem em todos os setores observando:", items: [
+          "Fardamento adequado.",
+          "Uso correto dos EPIs.",
+          "Organização.",
+          "Limpeza.",
+          "Abastecimento.",
+          "Atendimento.",
+          "Pendências do dia anterior.",
+          "Problemas já solucionados.",
+          "Novas demandas."
+        ]}
+      ]
+    },
+    {
+      id: "durante_manha", title: "Durante a Manhã", time: "8h00min", icon: "sun",
+      groups: [
+        { sub: "Acompanhamento da Operação", note: "Realizar acompanhamento constante da operação. Verificar:", items: [
+          "Atendimento ao cliente.",
+          "Rupturas.",
+          "Organização das gôndolas.",
+          "Limpeza dos setores.",
+          "Exposição de mercadorias.",
+          "Reposição.",
+          "Cumprimento das atividades pelas equipes.",
+          "Apoio às lideranças.",
+          "Solução dos problemas que surgirem durante o expediente.",
+          "Necessidade de remanejamento de colaboradores."
+        ]}
+      ]
+    },
+    {
+      id: "tarde", title: "Rotina da Tarde", time: "14h00min", icon: "sunset",
+      groups: [
+        { sub: "Gestão das Lideranças", items: [
+          "Reunir líderes quando necessário.",
+          "Organizar feedbacks.",
+          "Acompanhar desempenho das equipes.",
+          "Identificar dificuldades das lideranças.",
+          "Definir planos de ação."
+        ]},
+        { sub: "Gestão Comercial", note: "Analisar indicadores da loja:", items: [
+          "Vendas.",
+          "Margem.",
+          "Rupturas.",
+          "Quebras.",
+          "Metas.",
+          "Produtos de maior giro.",
+          "Produtos de baixo desempenho.",
+          "Estratégias promocionais.",
+          "Estratégias sazonais.",
+          "Necessidade de ações comerciais."
+        ]},
+        { sub: "Nova Vistoria Operacional — 14h00min", note: "Realizar uma segunda passagem em todos os setores observando:", items: [
+          "Atendimento.",
+          "Organização.",
+          "Limpeza.",
+          "Rupturas.",
+          "Exposição dos produtos.",
+          "Necessidade de reposição.",
+          "Situações pendentes.",
+          "Apoio às lideranças."
+        ]}
+      ]
+    },
+    {
+      id: "encerramento", title: "Encerramento do Dia", time: "17h00min", icon: "moon",
+      groups: [
+        { sub: "Fechamento", items: [
+          "Verificar pendências que ficaram para o dia seguinte.",
+          "Registrar ocorrências importantes.",
+          "Alinhar prioridades da abertura do próximo dia.",
+          "Informar à direção situações relevantes."
+        ]}
+      ]
+    }
+  ],
+  semanal: [
+    {
+      id: "reuniao_liderancas", title: "Reunião com as Lideranças", time: null, icon: "users",
+      groups: [
+        { sub: "Pauta Sugerida", items: [
+          "Indicadores.",
+          "Resultados.",
+          "Problemas da semana.",
+          "Planos de ação.",
+          "Desenvolvimento da equipe.",
+          "Necessidades de treinamento.",
+          "Organização da loja.",
+          "Atendimento ao cliente.",
+          "Metas da próxima semana."
+        ]}
+      ]
+    },
+    {
+      id: "reuniao_direcao", title: "Reunião com a Direção", time: null, icon: "building",
+      groups: [
+        { sub: "Apresentar", items: [
+          "Resultados da loja.",
+          "Principais desafios.",
+          "Necessidades operacionais.",
+          "Indicadores.",
+          "Planos de melhoria.",
+          "Demandas de investimento.",
+          "Acompanhamento das metas."
+        ]}
+      ]
+    }
+  ],
+  mensal: [
+    {
+      id: "reuniao_integrada", title: "Reunião Integrada dos Três Gerentes", time: null, icon: "layers",
+      groups: [
+        { sub: "Objetivos", items: [
+          "Compartilhar boas práticas.",
+          "Apresentar resultados de cada unidade.",
+          "Discutir dificuldades.",
+          "Padronizar processos.",
+          "Definir estratégias comerciais.",
+          "Avaliar campanhas.",
+          "Planejar ações sazonais.",
+          "Desenvolver melhorias operacionais.",
+          "Fortalecer a integração entre as lojas."
+        ]}
+      ]
+    }
+  ]
+ },
+ rh_dp: {
+  diario: [],
+  semanal: [],
+  mensal: [
+    {
+      id: "prazos_rh_dp", title: "Prazos e Regras — RH / DP", time: null, icon: "users",
+      groups: [
+        { sub: "Prazos e Comunicações do Mês", items: [
+          "Férias: passar até o dia 25 de cada mês.",
+          "Mudança de loja: informar antes da execução.",
+          "Folgas e banco de horas: informar até 2 dias antes.",
+          "Mudanças na escala 6x1: informar sempre antes de ocorrer a mudança, para ser avaliado se é possível (cabe à liderança e gerência).",
+          "Pagamento de feriado: respeitar o prazo máximo de 30 dias após o feriado para o funcionário ter direito à compensação da folga.",
+          "Fardamento: não fazer a entrega ao funcionário — sempre comunicar ao departamento pessoal para organização do controle.",
+          "Folha de pagamento: respeitar os prazos de entrega de informações até o segundo dia útil do mês."
+        ]}
+      ]
+    }
+  ]
+ },
+ comercial: {
+  diario: [],
+  semanal: [],
+  mensal: []
+ }
+};
+
+function loadChecklistData(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "checklist_data"));
+    if (saved && saved.operacional && saved.operacional.diario) return saved;
+  } catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+function saveChecklistData(){ localStorage.setItem(STORAGE_PREFIX + "checklist_data", JSON.stringify(DATA)); }
+let DATA = loadChecklistData();
+
+const TIPO_LABEL = { diario: "Diário", semanal: "Semanal", mensal: "Mensal" };
+const TIPO_ICON = { diario: "calendar", semanal: "users", mensal: "building" };
+
+const SOBRE_TEXT = [
+  "A rotina de um gerente operacional é dinâmica e repleta de desafios. Todos os dias surgem situações inesperadas, decisões importantes e demandas que exigem rapidez e equilíbrio. Por isso, organizar o tempo não significa apenas cumprir uma agenda, mas garantir que o que é realmente importante receba a devida atenção.",
+  "Criar o hábito de seguir uma rotina estruturada fortalece a disciplina, reduz esquecimentos, melhora a tomada de decisão e proporciona maior controle sobre a operação da loja. Pequenas ações realizadas de forma consistente geram grandes resultados ao longo do tempo.",
+  "Mais do que executar tarefas, o gerente deve estar presente, acompanhar sua equipe, orientar, desenvolver pessoas e antecipar problemas antes que eles impactem os resultados. Uma boa gestão nasce da constância, da organização e do compromisso diário com a excelência.",
+  "Lembre-se: a excelência não é construída por grandes ações isoladas, mas pela repetição diária de boas práticas. Quando a organização do tempo se transforma em hábito, a gestão torna-se mais eficiente, a equipe trabalha com mais segurança e os resultados aparecem de forma natural."
+];
+
+let currentView = "checklist";
+let currentTab = "diario";
+let histFilterLoja = "todas";
+let histFilterTipo = "todos";
+let collapsedState = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "collapsed") || "{}");
+
+/* Static icon injections */
+document.getElementById("icStore").innerHTML = icon("store", 17);
+document.getElementById("icUser").innerHTML = icon("user", 17);
+document.getElementById("icCalendar").innerHTML = icon("calendar", 15);
+document.getElementById("btnReset").innerHTML = icon("undo", 15, 2.2);
+document.getElementById("btnSave").innerHTML = icon("check", 17, 2.6) + "<span>Salvar checklist</span>";
+document.querySelectorAll(".nav-ic-wrap").forEach(el => {
+  el.innerHTML = icon(el.getAttribute("data-ic"), 18);
+});
+
+function todayStr(){
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off*60000);
+  return local.toISOString().slice(0,10);
+}
+function fmtDate(iso){
+  const [y,m,d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+function fmtDateShort(iso){
+  const [y,m,d] = iso.split("-");
+  return `${d}/${m}`;
+}
+function fmtHora(iso){
+  const d = new Date(iso);
+  return d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+}
+
+const dateInput = document.getElementById("dateInput");
+dateInput.value = todayStr();
+
+const lojaSelect = document.getElementById("lojaSelect");
+LOJAS.forEach(l => {
+  const opt = document.createElement("option");
+  opt.value = l; opt.textContent = l;
+  lojaSelect.appendChild(opt);
+});
+lojaSelect.value = localStorage.getItem(STORAGE_PREFIX + "last_loja") || LOJAS[0];
+
+const auditorInput = document.getElementById("auditorInput");
+auditorInput.value = localStorage.getItem(STORAGE_PREFIX + "last_auditor") || "";
+
+lojaSelect.addEventListener("change", () => {
+  localStorage.setItem(STORAGE_PREFIX + "last_loja", lojaSelect.value);
+  render();
+});
+auditorInput.addEventListener("input", () => {
+  localStorage.setItem(STORAGE_PREFIX + "last_auditor", auditorInput.value);
+});
+
+function getHistorico(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_PREFIX + "historico") || "[]"); } catch(e){ return []; }
+}
+function setHistorico(arr){
+  localStorage.setItem(STORAGE_PREFIX + "historico", JSON.stringify(arr));
+}
+
+function draftKey(tab, loja, dateStr){
+  return STORAGE_PREFIX + "draft_" + currentSector + "_" + tab + "_" + loja + "_" + dateStr;
+}
+function loadChecks(tab){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value);
+  try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch(e){ return {}; }
+}
+function saveChecks(tab, checks){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value);
+  localStorage.setItem(key, JSON.stringify(checks));
+}
+
+function itemId(sectionId, groupIdx, idx){
+  return sectionId + "__g" + groupIdx + "__" + idx;
+}
+
+function summarize(tab, checks){
+  const sections = DATA[currentSector][tab];
+  let total = 0, done = 0;
+  const sectionSummaries = [];
+  const pendentes = [];
+  sections.forEach(s => {
+    let sTotal = 0, sDone = 0;
+    s.groups.forEach((g, gi) => g.items.forEach((text, idx) => {
+      const id = itemId(s.id, gi, idx);
+      sTotal++; total++;
+      if (checks[id]) { sDone++; done++; }
+      else pendentes.push(text);
+    }));
+    sectionSummaries.push({ id: s.id, title: s.title, done: sDone, total: sTotal });
+  });
+  const pct = total ? Math.round(done/total*100) : 0;
+  return { total, done, pct, sections: sectionSummaries, pendentes };
+}
+
+function renderSection(section, checks){
+  const isCollapsed = !!collapsedState[section.id];
+  let itemsHtml = "";
+  section.groups.forEach((g, gi) => {
+    if (g.sub) itemsHtml += `<div class="subheader">${g.sub}</div>`;
+    if (g.note) itemsHtml += `<div class="note">${g.note}</div>`;
+    g.items.forEach((text, idx) => {
+      const id = itemId(section.id, gi, idx);
+      const checked = !!checks[id];
+      itemsHtml += `
+        <label class="check-item" data-item="${id}">
+          <input type="checkbox" ${checked ? "checked" : ""} data-item="${id}">
+          <span class="box">${icon("check", 13, 3)}</span>
+          <span class="txt">${text}</span>
+        </label>`;
+    });
+  });
+
+  const total = section.groups.reduce((a,g)=>a+g.items.length,0);
+  const done = section.groups.reduce((a,g,gi)=>a+g.items.filter((t,idx)=>!!checks[itemId(section.id,gi,idx)]).length,0);
+
+  return `
+    <div class="section-card">
+      <div class="section-head ${isCollapsed ? 'collapsed' : ''}" data-section="${section.id}">
+        <div class="head-left">
+          <span class="section-icon">${icon(section.icon || "checklist", 18, 2)}</span>
+          <div class="title-block">
+            <span class="title">${section.title}</span>
+            ${section.time ? `<span class="time">${section.time}</span>` : ""}
+          </div>
+        </div>
+        <div class="head-right">
+          <span class="count">${done}/${total}</span>
+          <span class="chevron">${chevronIcon()}</span>
+        </div>
+      </div>
+      <div class="section-body ${isCollapsed ? 'hidden' : ''}" id="body_${section.id}">
+        ${itemsHtml}
+      </div>
+    </div>`;
+}
+
+function renderSobre(){
+  let html = '<div class="info-box"><div class="info-box-inner">';
+  html += `<div class="quote-mark">&ldquo;</div>`;
+  SOBRE_TEXT.forEach(p => html += `<p>${p}</p>`);
+  html += `<div class="cta-block">
+    <div class="cta">Planeje. Execute. Acompanhe. Corrija. Evolua.</div>
+    <div class="cta-sub">Esse é o ciclo de uma gestão forte, organizada e comprometida com a melhoria contínua.</div>
+  </div>`;
+  html += '</div></div>';
+  return html;
+}
+
+function pctClass(pct){
+  if (pct >= 90) return "good";
+  if (pct >= 60) return "mid";
+  return "bad";
+}
+
+function emptyState(iconName, title, sub){
+  return `<div class="empty-hint">${icon(iconName, 42, 1.5)}<div style="font-weight:700;color:#4B5568;margin-bottom:4px;">${title}</div>${sub || ""}</div>`;
+}
+
+function renderHistorico(){
+  const hist = getHistorico().filter(r => (r.setor || "operacional") === currentSector).sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+
+  let html = `<div class="filter-row">
+    <select id="histLojaFilter" ${isGerente() ? "disabled" : ""}>
+      ${isGerente() ? `<option value="${session.loja}" selected>${session.loja}</option>` : `
+      <option value="todas">Todas as lojas</option>
+      ${LOJAS.map(l => `<option value="${l}" ${histFilterLoja===l?"selected":""}>${l}</option>`).join("")}`}
+    </select>
+    <select id="histTipoFilter">
+      <option value="todos">Todos os tipos</option>
+      ${SECTOR_META[currentSector].tipos.map(t => `<option value="${t}" ${histFilterTipo===t?"selected":""}>${TIPO_LABEL[t]}</option>`).join("")}
+    </select>
+  </div>`;
+
+  const filtered = hist.filter(r =>
+    (histFilterLoja === "todas" || r.loja === histFilterLoja) &&
+    (histFilterTipo === "todos" || r.tipo === histFilterTipo)
+  );
+
+  if (!filtered.length){
+    html += emptyState("inbox", "Nenhum checklist salvo ainda", `<span>Preencha um checklist e toque em "Salvar checklist".</span>`);
+    document.getElementById("main").innerHTML = html;
+    attachHistFilterHandlers();
+    return;
+  }
+
+  filtered.forEach(r => {
+    html += `
+      <div class="hist-card">
+        <div class="hist-icon">${icon(TIPO_ICON[r.tipo] || "calendar", 18, 2)}</div>
+        <div class="hist-body">
+          <div class="hist-top">
+            <div>
+              <span class="hist-tipo">${TIPO_LABEL[r.tipo]}</span>
+              <div class="hist-loja">${r.loja}</div>
+              <div class="hist-meta">${fmtDate(r.date)} às ${fmtHora(r.savedAt)} · ${r.auditor}</div>
+            </div>
+            <div class="hist-pct ${pctClass(r.pct)}">${r.pct}%</div>
+          </div>
+          ${r.pendentes.length ? `<div class="hist-pendentes"><strong>${r.pendentes.length} pendente(s):</strong> ${r.pendentes.slice(0,3).join(" · ")}${r.pendentes.length>3 ? "…" : ""}</div>` : ""}
+          <button class="hist-pdf-btn" data-print-id="${r.id}">${icon("printer",13,2)} Gerar PDF</button>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById("main").innerHTML = html;
+  attachHistFilterHandlers();
+}
+
+function attachHistFilterHandlers(){
+  const lf = document.getElementById("histLojaFilter");
+  const tf = document.getElementById("histTipoFilter");
+  if (lf) lf.addEventListener("change", () => { histFilterLoja = lf.value; renderHistorico(); });
+  if (tf) tf.addEventListener("change", () => { histFilterTipo = tf.value; renderHistorico(); });
+  document.querySelectorAll(".hist-pdf-btn").forEach(btn => {
+    btn.addEventListener("click", () => printRecord(btn.getAttribute("data-print-id")));
+  });
+}
+
+function printRecord(recordId){
+  const r = getHistorico().find(x => x.id === recordId);
+  if (!r) return;
+  const pendentesHtml = r.pendentes.length
+    ? `<ul style="margin:8px 0 0;padding-left:20px;">${r.pendentes.map(t => `<li style="margin-bottom:4px;">${t}</li>`).join("")}</ul>`
+    : `<p style="color:#1F9D57;font-weight:700;">Nenhum item pendente — checklist 100% concluído.</p>`;
+  const sectionsHtml = r.sections.map(s => `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;">${s.title}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;text-align:right;font-weight:700;">${s.done}/${s.total}</td>
+    </tr>`).join("");
+  document.getElementById("printArea").innerHTML = `
+    <div style="font-family:Arial,Helvetica,sans-serif;color:#1B2233;max-width:760px;margin:0 auto;padding:30px;">
+      <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #0A29B5;padding-bottom:16px;margin-bottom:20px;">
+        <img src="logo.png" style="width:52px;height:52px;border-radius:11px;">
+        <div>
+          <div style="font-size:19px;font-weight:800;">Checklist Rotina Gerencial</div>
+          <div style="font-size:12px;color:#6B7280;">Albano Supermercado</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:22px;font-size:13.5px;">
+        <tr><td style="padding:5px 0;color:#6B7280;width:160px;">Setor</td><td style="font-weight:700;">${SECTOR_META[r.setor || "operacional"].label}</td></tr>
+        <tr><td style="padding:5px 0;color:#6B7280;">Tipo</td><td style="font-weight:700;">${TIPO_LABEL[r.tipo]}</td></tr>
+        <tr><td style="padding:5px 0;color:#6B7280;">Loja</td><td style="font-weight:700;">${r.loja}</td></tr>
+        <tr><td style="padding:5px 0;color:#6B7280;">Auditor / Gerente</td><td style="font-weight:700;">${r.auditor}</td></tr>
+        <tr><td style="padding:5px 0;color:#6B7280;">Data do registro</td><td style="font-weight:700;">${fmtDate(r.date)}</td></tr>
+        <tr><td style="padding:5px 0;color:#6B7280;">Salvo às</td><td style="font-weight:700;">${fmtHora(r.savedAt)}</td></tr>
+        <tr><td style="padding:5px 0;color:#6B7280;">Resultado</td><td style="font-weight:800;font-size:17px;color:#0A29B5;">${r.done}/${r.total} itens concluídos (${r.pct}%)</td></tr>
+      </table>
+      <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Detalhamento por seção</h3>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:22px;">${sectionsHtml}</table>
+      <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Itens pendentes</h3>
+      ${pendentesHtml}
+      <p style="margin-top:36px;font-size:10.5px;color:#9AA3B2;">Documento gerado em ${new Date().toLocaleString("pt-BR")} — Falcioni Consultoria</p>
+    </div>`;
+  window.print();
+}
+
+let gradCounter = 0;
+function barChartSvg(items, baseColor){
+  const w = 300, h = 148, barGap = 10, topPad = 22, axisY = h - 22;
+  const n = items.length || 1;
+  const barW = Math.max(16, (w - barGap*(n+1)) / n);
+  const gid = "grad" + (gradCounter++);
+  let bars = "", labels = "";
+  items.forEach((it, i) => {
+    const x = barGap + i*(barW+barGap);
+    const barH = Math.max(3, (it.value/100) * (axisY-topPad));
+    const y = axisY - barH;
+    bars += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="4" fill="url(#${gid})"></rect>`;
+    bars += `<text x="${x+barW/2}" y="${y-6}" font-size="9.5" font-weight="700" text-anchor="middle" fill="#374151">${it.value}%</text>`;
+    labels += `<text x="${x+barW/2}" y="${h-6}" font-size="9" text-anchor="middle" fill="#8B93A5">${it.label}</text>`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block;">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${baseColor.light}"/>
+      <stop offset="100%" stop-color="${baseColor.dark}"/>
+    </linearGradient></defs>
+    <line x1="0" y1="${axisY}" x2="${w}" y2="${axisY}" stroke="#EDEFF4" stroke-width="1"/>
+    ${bars}${labels}
+  </svg>`;
+}
+
+function renderDashboard(){
+  const scoped = isGerente();
+  const trendTipo = SECTOR_META[currentSector].tipos[0];
+  const hist = getHistorico().filter(r => (r.setor || "operacional") === currentSector && (!scoped || r.loja === session.loja));
+  const diarios = hist.filter(r => r.tipo === trendTipo).sort((a,b) => new Date(a.savedAt) - new Date(b.savedAt));
+
+  if (!hist.length){
+    document.getElementById("main").innerHTML = emptyState("chartEmpty", "Ainda não há dados suficientes", "<span>Salve alguns checklists para ver o dashboard.</span>");
+    return;
+  }
+
+  const totalExec = hist.length;
+  const mediaGeral = Math.round(hist.reduce((a,r)=>a+r.pct,0) / hist.length);
+
+  const porLoja = {};
+  LOJAS.forEach(l => porLoja[l] = []);
+  hist.forEach(r => { if (porLoja[r.loja]) porLoja[r.loja].push(r.pct); });
+  let melhorLoja = "—", melhorMedia = -1;
+  LOJAS.forEach(l => {
+    if (porLoja[l].length){
+      const m = Math.round(porLoja[l].reduce((a,b)=>a+b,0)/porLoja[l].length);
+      if (m > melhorMedia){ melhorMedia = m; melhorLoja = l; }
+    }
+  });
+
+  const seteDiasAtras = Date.now() - 7*24*60*60*1000;
+  const execSemana = hist.filter(r => new Date(r.savedAt).getTime() >= seteDiasAtras).length;
+
+  let html = `<div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--blue-light);color:var(--blue);">${icon("box",17,2)}</div>
+      <div class="val">${totalExec}</div><div class="lbl">Checklists salvos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--green-light);color:var(--green);">${icon("trendUp",17,2)}</div>
+      <div class="val">${mediaGeral}%</div><div class="lbl">Média geral de conclusão</div>
+    </div>
+    ${scoped ? "" : `<div class="stat-card">
+      <div class="stat-icon" style="background:var(--gold-light);color:var(--gold);">${icon("award",17,2)}</div>
+      <div class="val" style="font-size:14.5px;">${melhorLoja}</div><div class="lbl">Melhor desempenho (${melhorMedia>=0?melhorMedia:0}%)</div>
+    </div>`}
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--blue-light);color:var(--blue);">${icon("clock",17,2)}</div>
+      <div class="val">${execSemana}</div><div class="lbl">Execuções nos últimos 7 dias</div>
+    </div>
+  </div>`;
+
+  const recentes = diarios.slice(-10);
+  html += `<div class="chart-card">
+    <h3>${icon("trendUp",15,2.2)}Evolução — checklist ${TIPO_LABEL[trendTipo].toLowerCase()} (últimos registros)</h3>
+    ${recentes.length ? barChartSvg(recentes.map(r => ({label: fmtDateShort(r.date), value: r.pct})), {light:"#3D5FE0", dark:"#0A29B5"}) : '<div class="empty-hint" style="padding:10px;">Sem registros diários ainda.</div>'}
+  </div>`;
+
+  if (!scoped){
+    const lojaItems = LOJAS.map(l => ({
+      label: l.replace("Filial ","F. ").replace("Matriz ","M. "),
+      value: porLoja[l].length ? Math.round(porLoja[l].reduce((a,b)=>a+b,0)/porLoja[l].length) : 0
+    }));
+    html += `<div class="chart-card">
+      <h3>${icon("store",15,2.2)}Desempenho médio por loja — relatório geral</h3>
+      ${barChartSvg(lojaItems, {light:"#34C17E", dark:"#178048"})}
+    </div>`;
+  }
+
+  const freq = {};
+  hist.forEach(r => r.pendentes.forEach(t => { freq[t] = (freq[t]||0) + 1; }));
+  const topPend = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,6);
+  html += `<div class="chart-card">
+    <h3>${icon("alert",15,2.2)}Itens mais frequentemente pendentes</h3>
+    ${topPend.length ? `<ul class="pending-list">${topPend.map(([t,c],i) => `<li><span><span class="pending-rank">${i+1}</span>${t}</span><span class="pending-count">${c}x</span></li>`).join("")}</ul>` : '<div class="empty-hint" style="padding:10px;">Nenhum item pendente registrado — ótimo trabalho!</div>'}
+  </div>`;
+
+  document.getElementById("main").innerHTML = html;
+}
+
+let cfgCurrentTipo = "diario";
+let cfgCurrentSector = currentSector;
+
+function renderConfig(){
+  if (!SECTOR_META[cfgCurrentSector].tipos.includes(cfgCurrentTipo)) cfgCurrentTipo = SECTOR_META[cfgCurrentSector].tipos[0];
+  let html = `<div class="cfg-section">
+    <h3 class="cfg-heading">${icon("key",16,2)}Perfis de Acesso</h3>
+    <p class="cfg-hint">Senha do Diretor (acesso master)</p>
+    <div class="cfg-row"><input type="text" id="cfgDiretorPass" value="${APP_CONFIG.diretorPassword}"></div>
+    <p class="cfg-hint">Lojas e senhas dos gestores</p>
+    <div id="cfgGerentesList">
+      ${APP_CONFIG.gerentes.map((g,i) => `
+        <div class="cfg-gerente-row" data-idx="${i}">
+          <input type="text" class="cfg-loja-input" value="${g.loja}" placeholder="Nome da loja">
+          <input type="text" class="cfg-pass-input" value="${g.password}" placeholder="Senha">
+          <button class="cfg-del-btn" data-idx="${i}" title="Remover loja">${icon("trash",15,2)}</button>
+        </div>`).join("")}
+    </div>
+    <button class="cfg-add-btn" id="cfgAddGerente">${icon("plus",14,2.4)} Adicionar loja</button>
+    <button class="cfg-save-btn" id="cfgSaveAccess">${icon("check",15,2.6)} Salvar alterações de acesso</button>
+  </div>
+
+  <div class="cfg-section">
+    <h3 class="cfg-heading">${icon("checklist",16,2)}Itens do Checklist</h3>
+    <p class="cfg-hint">Setor</p>
+    <div class="cfg-tipo-tabs" id="cfgSectorTabs">
+      ${SECTOR_LIST.map(sec => `<button class="cfg-tipo-btn ${cfgCurrentSector===sec?"active":""}" data-cfgsector="${sec}">${SECTOR_META[sec].short}</button>`).join("")}
+    </div>
+    <p class="cfg-hint">Período</p>
+    <div class="cfg-tipo-tabs" id="cfgTipoTabs">
+      ${SECTOR_META[cfgCurrentSector].tipos.map(t => `<button class="cfg-tipo-btn ${cfgCurrentTipo===t?"active":""}" data-cfgtipo="${t}">${TIPO_LABEL[t]}</button>`).join("")}
+    </div>
+    <div id="cfgItemsArea"></div>
+    <button class="cfg-add-section-btn" id="cfgAddSection">${icon("plus",14,2.4)} Adicionar seção</button>
+    <button class="cfg-save-btn" id="cfgSaveItems">${icon("check",15,2.6)} Salvar itens do checklist</button>
+  </div>`;
+
+  document.getElementById("main").innerHTML = html;
+  renderCfgItemsArea(cfgCurrentTipo);
+  attachConfigHandlers();
+}
+
+function renderCfgItemsArea(tipo){
+  cfgCurrentTipo = tipo;
+  const sections = DATA[cfgCurrentSector][tipo];
+  if (!sections.length){
+    document.getElementById("cfgItemsArea").innerHTML = `<div class="empty-hint" style="padding:24px 10px;">Nenhuma seção cadastrada ainda neste período.<br>Use "Adicionar seção" abaixo para começar.</div>`;
+    return;
+  }
+  let html = "";
+  sections.forEach((s, si) => {
+    html += `<div class="cfg-cs-card">
+      <input type="text" class="cfg-section-title" data-si="${si}" value="${s.title.replace(/"/g,"&quot;")}">
+      ${s.groups.map((g, gi) => `
+        <div class="cfg-group-block">
+          <input type="text" class="cfg-group-sub" data-si="${si}" data-gi="${gi}" value="${(g.sub||"").replace(/"/g,"&quot;")}" placeholder="Subtítulo do grupo">
+          <div class="cfg-items-list">
+            ${g.items.map((t, ii) => `
+              <div class="cfg-item-row">
+                <input type="text" class="cfg-item-text" data-si="${si}" data-gi="${gi}" data-ii="${ii}" value="${t.replace(/"/g,"&quot;")}">
+                <button class="cfg-item-del" data-si="${si}" data-gi="${gi}" data-ii="${ii}" title="Remover item">${icon("trash",13,2)}</button>
+              </div>`).join("")}
+          </div>
+          <button class="cfg-item-add" data-si="${si}" data-gi="${gi}">${icon("plus",12,2.6)} Adicionar item</button>
+        </div>`).join("")}
+    </div>`;
+  });
+  document.getElementById("cfgItemsArea").innerHTML = html;
+  attachCfgItemHandlers();
+}
+
+function attachConfigHandlers(){
+  document.getElementById("cfgAddGerente").addEventListener("click", () => {
+    APP_CONFIG.gerentes.push({ id: "loja_" + Date.now(), loja: "Nova Loja", password: "123456" });
+    renderConfig();
+  });
+
+  document.querySelectorAll(".cfg-del-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (APP_CONFIG.gerentes.length <= 1){ showToast("É preciso manter ao menos 1 loja."); return; }
+      if (confirm("Remover esta loja e o acesso de login do gestor dela? O histórico salvo dessa loja continua guardado.")){
+        const idx = +btn.getAttribute("data-idx");
+        APP_CONFIG.gerentes.splice(idx, 1);
+        renderConfig();
+      }
+    });
+  });
+
+  document.getElementById("cfgSaveAccess").addEventListener("click", () => {
+    const newDiretorPass = document.getElementById("cfgDiretorPass").value.trim();
+    if (newDiretorPass) APP_CONFIG.diretorPassword = newDiretorPass;
+    document.querySelectorAll(".cfg-gerente-row").forEach(row => {
+      const idx = +row.getAttribute("data-idx");
+      const loja = row.querySelector(".cfg-loja-input").value.trim();
+      const pass = row.querySelector(".cfg-pass-input").value.trim();
+      if (loja) APP_CONFIG.gerentes[idx].loja = loja;
+      if (pass) APP_CONFIG.gerentes[idx].password = pass;
+    });
+    saveAppConfig();
+    refreshConfigDerived();
+    rebuildLoginRoleOptions();
+    applyRoleRestrictions();
+    showToast("Perfis de acesso atualizados.");
+  });
+
+  document.querySelectorAll("#cfgSectorTabs .cfg-tipo-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      cfgCurrentSector = btn.getAttribute("data-cfgsector");
+      renderConfig();
+    });
+  });
+
+  document.querySelectorAll("#cfgTipoTabs .cfg-tipo-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#cfgTipoTabs .cfg-tipo-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderCfgItemsArea(btn.getAttribute("data-cfgtipo"));
+    });
+  });
+
+  document.getElementById("cfgAddSection").addEventListener("click", () => {
+    DATA[cfgCurrentSector][cfgCurrentTipo].push({
+      id: "sec_" + Date.now(), title: "Nova Seção", time: null, icon: "checklist",
+      groups: [{ sub: "Itens", items: ["Novo item."] }]
+    });
+    renderCfgItemsArea(cfgCurrentTipo);
+  });
+
+  document.getElementById("cfgSaveItems").addEventListener("click", saveChecklistItemsFromForm);
+}
+
+function attachCfgItemHandlers(){
+  document.querySelectorAll(".cfg-item-del").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const si = +btn.getAttribute("data-si"), gi = +btn.getAttribute("data-gi"), ii = +btn.getAttribute("data-ii");
+      DATA[cfgCurrentSector][cfgCurrentTipo][si].groups[gi].items.splice(ii, 1);
+      renderCfgItemsArea(cfgCurrentTipo);
+    });
+  });
+  document.querySelectorAll(".cfg-item-add").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const si = +btn.getAttribute("data-si"), gi = +btn.getAttribute("data-gi");
+      DATA[cfgCurrentSector][cfgCurrentTipo][si].groups[gi].items.push("Novo item.");
+      renderCfgItemsArea(cfgCurrentTipo);
+    });
+  });
+}
+
+function saveChecklistItemsFromForm(){
+  document.querySelectorAll(".cfg-section-title").forEach(inp => {
+    const si = +inp.getAttribute("data-si");
+    if (inp.value.trim()) DATA[cfgCurrentSector][cfgCurrentTipo][si].title = inp.value.trim();
+  });
+  document.querySelectorAll(".cfg-group-sub").forEach(inp => {
+    const si = +inp.getAttribute("data-si"), gi = +inp.getAttribute("data-gi");
+    DATA[cfgCurrentSector][cfgCurrentTipo][si].groups[gi].sub = inp.value.trim();
+  });
+  document.querySelectorAll(".cfg-item-text").forEach(inp => {
+    const si = +inp.getAttribute("data-si"), gi = +inp.getAttribute("data-gi"), ii = +inp.getAttribute("data-ii");
+    if (inp.value.trim()) DATA[cfgCurrentSector][cfgCurrentTipo][si].groups[gi].items[ii] = inp.value.trim();
+  });
+  saveChecklistData();
+  showToast("Itens do checklist salvos.");
+}
+
+function rebuildLoginRoleOptions(){
+  loginRoleSelect.innerHTML = "";
+  ROLES.forEach(r => {
+    const opt = document.createElement("option");
+    opt.value = r.id; opt.textContent = r.label;
+    loginRoleSelect.appendChild(opt);
+  });
+}
+
+function renderSectorTabs(){
+  const wrap = document.getElementById("sectorTabsRow");
+  wrap.innerHTML = SECTOR_LIST.map(sec => {
+    const meta = SECTOR_META[sec];
+    const active = sec === currentSector;
+    return `<button class="sector-tab-btn ${active?"active":""} ${meta.ready?"":"disabled"}" data-sector="${sec}">
+      ${icon(meta.icon, 14, 2.2)}<span>${meta.short}</span>
+      ${meta.ready ? "" : `<span class="badge-soon">Em breve</span>`}
+    </button>`;
+  }).join("");
+  document.querySelectorAll(".sector-tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const sec = btn.getAttribute("data-sector");
+      if (!SECTOR_META[sec].ready){ showToast("Esse setor ainda vai ser preenchido em breve."); return; }
+      if (sec === currentSector) return;
+      currentSector = sec;
+      localStorage.setItem(STORAGE_PREFIX + "current_sector", currentSector);
+      if (!SECTOR_META[currentSector].tipos.includes(currentTab)) currentTab = SECTOR_META[currentSector].tipos[0];
+      render();
+    });
+  });
+}
+
+function renderPillTabs(){
+  const wrap = document.getElementById("pillTabsWrap");
+  const tipos = SECTOR_META[currentSector].tipos;
+  if (!tipos.includes(currentTab)) currentTab = tipos[0];
+  wrap.innerHTML = tipos.map(t => `<button class="tab-btn ${t===currentTab?"active":""}" data-tab="${t}">${TIPO_LABEL[t]}</button>`).join("");
+  document.querySelectorAll("#pillTabsWrap .tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#pillTabsWrap .tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentTab = btn.getAttribute("data-tab");
+      render();
+    });
+  });
+}
+
+function render(){
+  const main = document.getElementById("main");
+  const fabSave = document.getElementById("btnSave");
+  const idRow = document.getElementById("idRow");
+  const subnavRow = document.getElementById("subnavRow");
+  const progressWrap = document.getElementById("progressWrap");
+  const sectorTabsRow = document.getElementById("sectorTabsRow");
+
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === currentView));
+
+  if (currentView === "sobre"){
+    main.innerHTML = renderSobre();
+    fabSave.style.display = "none";
+    idRow.style.display = "none";
+    subnavRow.style.display = "none";
+    progressWrap.style.display = "none";
+    sectorTabsRow.style.display = "none";
+    return;
+  }
+
+  if (currentView === "historico"){
+    idRow.style.display = "none";
+    subnavRow.style.display = "none";
+    progressWrap.style.display = "none";
+    fabSave.style.display = "none";
+    sectorTabsRow.style.display = "flex";
+    renderSectorTabs();
+    renderHistorico();
+    return;
+  }
+
+  if (currentView === "dashboard"){
+    idRow.style.display = "none";
+    subnavRow.style.display = "none";
+    progressWrap.style.display = "none";
+    fabSave.style.display = "none";
+    sectorTabsRow.style.display = "flex";
+    renderSectorTabs();
+    renderDashboard();
+    return;
+  }
+
+  if (currentView === "config"){
+    if (isGerente()){ currentView = "checklist"; }
+    else {
+      idRow.style.display = "none";
+      subnavRow.style.display = "none";
+      progressWrap.style.display = "none";
+      fabSave.style.display = "none";
+      sectorTabsRow.style.display = "none";
+      renderConfig();
+      return;
+    }
+  }
+
+  // currentView === 'checklist'
+  idRow.style.display = "flex";
+  subnavRow.style.display = "flex";
+  progressWrap.style.display = "flex";
+  fabSave.style.display = "flex";
+  sectorTabsRow.style.display = "flex";
+  renderSectorTabs();
+  renderPillTabs();
+
+  const sections = DATA[currentSector][currentTab];
+  const checks = loadChecks(currentTab);
+  if (!sections.length){
+    main.innerHTML = emptyState("inbox", SECTOR_META[currentSector].ready ? "Nenhum item cadastrado ainda" : "Setor em construção", SECTOR_META[currentSector].ready ? "<span>Peça ao Diretor para cadastrar os itens em Configurações.</span>" : "<span>Esse setor ainda vai ser preenchido em breve.</span>");
+  } else {
+    main.innerHTML = sections.map(s => renderSection(s, checks)).join("");
+  }
+  updateProgress();
+  attachChecklistHandlers();
+}
+
+function updateProgress(){
+  const checks = loadChecks(currentTab);
+  const sum = summarize(currentTab, checks);
+  document.getElementById("progressFill").style.width = sum.pct + "%";
+  document.getElementById("progressPct").textContent = `${sum.done}/${sum.total} · ${sum.pct}%`;
+}
+
+function attachChecklistHandlers(){
+  document.querySelectorAll(".section-head").forEach(el => {
+    el.addEventListener("click", () => {
+      const id = el.getAttribute("data-section");
+      collapsedState[id] = !collapsedState[id];
+      localStorage.setItem(STORAGE_PREFIX + "collapsed", JSON.stringify(collapsedState));
+      el.classList.toggle("collapsed");
+      document.getElementById("body_" + id).classList.toggle("hidden");
+    });
+  });
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener("change", () => {
+      const checks = loadChecks(currentTab);
+      checks[cb.getAttribute("data-item")] = cb.checked;
+      saveChecks(currentTab, checks);
+      updateCounts();
+      updateProgress();
+    });
+  });
+}
+
+function updateCounts(){
+  const checks = loadChecks(currentTab);
+  DATA[currentSector][currentTab].forEach(s => {
+    const total = s.groups.reduce((a,g)=>a+g.items.length,0);
+    const done = s.groups.reduce((a,g,gi)=>a+g.items.filter((t,idx)=>!!checks[itemId(s.id,gi,idx)]).length,0);
+    const headEl = document.querySelector(`.section-head[data-section="${s.id}"] .count`);
+    if (headEl) headEl.textContent = `${done}/${total}`;
+  });
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentView = btn.getAttribute("data-view");
+    render();
+  });
+});
+
+dateInput.addEventListener("change", render);
+
+document.getElementById("btnSave").addEventListener("click", () => {
+  if (!auditorInput.value.trim()){
+    showToast("Informe o nome do auditor antes de salvar");
+    auditorInput.focus();
+    return;
+  }
+  const checks = loadChecks(currentTab);
+  const sum = summarize(currentTab, checks);
+  const record = {
+    id: Date.now() + "_" + Math.random().toString(36).slice(2,8),
+    setor: currentSector,
+    tipo: currentTab,
+    loja: lojaSelect.value,
+    auditor: auditorInput.value.trim(),
+    date: dateInput.value,
+    savedAt: new Date().toISOString(),
+    total: sum.total,
+    done: sum.done,
+    pct: sum.pct,
+    sections: sum.sections,
+    pendentes: sum.pendentes
+  };
+  let hist = getHistorico();
+  hist = hist.filter(r => !(r.setor === record.setor && r.tipo === record.tipo && r.loja === record.loja && r.date === record.date));
+  hist.push(record);
+  setHistorico(hist);
+  showToast(`Salvo às ${fmtHora(record.savedAt)} — ${sum.pct}% concluído`);
+});
+
+document.getElementById("btnReset").addEventListener("click", () => {
+  if (confirm("Deseja reiniciar todos os itens marcados desta lista?")){
+    saveChecks(currentTab, {});
+    render();
+    showToast("Checklist reiniciado");
+  }
+});
+
+/* ---------- Login / sessão ---------- */
+const SESSION_KEY = STORAGE_PREFIX + "session";
+let session = null;
+try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch(e){ session = null; }
+
+const loginRoleSelect = document.getElementById("loginRoleSelect");
+ROLES.forEach(r => {
+  const opt = document.createElement("option");
+  opt.value = r.id; opt.textContent = r.label;
+  loginRoleSelect.appendChild(opt);
+});
+
+document.getElementById("btnLogout").innerHTML = icon("logout", 13, 2.4);
+
+function isGerente(){ return session && session.role === "gerente"; }
+
+function applyRoleRestrictions(){
+  if (!session) return;
+  const displayName = isGerente() ? session.loja : "Diretor";
+  const displayRole = isGerente() ? "Gestor de loja" : "Acesso master";
+  document.getElementById("ucLabelText").textContent = displayName;
+  document.getElementById("ucRoleText").textContent = displayRole;
+  document.getElementById("suName").textContent = displayName;
+  document.getElementById("suRole").textContent = displayRole;
+  const initials = displayName.split(" ").filter(w => w.length > 2 || /^[A-ZÀ-Ú]/.test(w)).slice(0,2).map(w => w[0]).join("").toUpperCase() || displayName.slice(0,2).toUpperCase();
+  document.getElementById("suAvatar").textContent = initials;
+  document.getElementById("navConfig").style.display = isGerente() ? "none" : "flex";
+
+  if (isGerente()){
+    lojaSelect.innerHTML = "";
+    const opt = document.createElement("option");
+    opt.value = session.loja; opt.textContent = session.loja;
+    lojaSelect.appendChild(opt);
+    lojaSelect.value = session.loja;
+    lojaSelect.disabled = true;
+    histFilterLoja = session.loja;
+  } else {
+    lojaSelect.disabled = false;
+    if (lojaSelect.options.length < LOJAS.length){
+      lojaSelect.innerHTML = "";
+      LOJAS.forEach(l => {
+        const opt = document.createElement("option");
+        opt.value = l; opt.textContent = l;
+        lojaSelect.appendChild(opt);
+      });
+      lojaSelect.value = localStorage.getItem(STORAGE_PREFIX + "last_loja") || LOJAS[0];
+    }
+  }
+}
+
+function doLogin(){
+  const id = loginRoleSelect.value;
+  const pass = document.getElementById("loginPassword").value;
+  const found = ROLES.find(r => r.id === id);
+  const errEl = document.getElementById("loginError");
+  if (found && pass === found.password){
+    session = { id: found.id, role: found.role, loja: found.loja, label: found.label };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    errEl.textContent = "";
+    startApp();
+  } else {
+    errEl.textContent = "Senha incorreta. Tente novamente.";
+  }
+}
+
+document.getElementById("loginBtn").addEventListener("click", doLogin);
+document.getElementById("loginPassword").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
+
+document.getElementById("btnLogout").addEventListener("click", () => {
+  if (confirm("Deseja sair do aplicativo?")){
+    localStorage.removeItem(SESSION_KEY);
+    location.reload();
+  }
+});
+
+function startApp(){
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("appShell").style.display = "block";
+  applyRoleRestrictions();
+  render();
+}
+
+if (session){
+  startApp();
+} else {
+  document.getElementById("loginScreen").style.display = "flex";
+}
+
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

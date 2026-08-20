@@ -1,0 +1,14 @@
+{
+  "name": "Checklist Rotina Gerencial - Albano Supermercado",
+  "short_name": "Checklist Albano",
+  "description": "Checklist de rotina diária, semanal e mensal da gerência operacional",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#061764",
+  "theme_color": "#061764",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
