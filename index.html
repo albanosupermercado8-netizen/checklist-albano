@@ -1417,7 +1417,29 @@
 
 <div id="printArea"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
+/* ---------- Firebase (Firestore) ---------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA7pHg62mWWxMQvjwXYHG-BFhJhsTZwirU",
+  authDomain: "checklist-gerencial.firebaseapp.com",
+  projectId: "checklist-gerencial",
+  storageBucket: "checklist-gerencial.firebasestorage.app",
+  messagingSenderId: "775428685906",
+  appId: "1:775428685906:web:d040ae84f369ab7ca71f8b"
+};
+let db = null;
+let firebaseReady = false;
+try {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  firebaseReady = true;
+} catch(e){
+  console.error("Firebase init falhou, app continua em modo local:", e);
+}
+
+
 /* ---------- Icon set (stroke-based, currentColor) ---------- */
 const ICON_PATHS = {
   checklist: '<path d="M9 4.5H7a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6.5a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/>',
@@ -1478,7 +1500,37 @@ function loadAppConfig(){
   } catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT_APP_CONFIG));
 }
-function saveAppConfig(){ localStorage.setItem(STORAGE_PREFIX + "app_config", JSON.stringify(APP_CONFIG)); }
+function saveAppConfig(){
+  localStorage.setItem(STORAGE_PREFIX + "app_config", JSON.stringify(APP_CONFIG));
+  if (firebaseReady){
+    db.collection("meta").doc("app_config").set(APP_CONFIG).catch(e => console.error("Erro ao salvar config no Firebase:", e));
+  }
+}
+
+function initAppConfigSync(){
+  if (!firebaseReady) return;
+  const ref = db.collection("meta").doc("app_config");
+  let seeding = false;
+  ref.onSnapshot(snap => {
+    const data = snap.exists ? snap.data() : null;
+    if (data && Array.isArray(data.gerentes) && data.gerentes.length){
+      APP_CONFIG = data;
+    } else if (!seeding){
+      seeding = true;
+      ref.set(APP_CONFIG).catch(e => console.error("Erro ao semear config no Firebase:", e));
+      return;
+    } else {
+      return;
+    }
+    localStorage.setItem(STORAGE_PREFIX + "app_config", JSON.stringify(APP_CONFIG));
+    refreshConfigDerived();
+    rebuildLoginRoleOptions();
+    if (session){
+      applyRoleRestrictions();
+      if (currentView === "checklist" || currentView === "historico" || currentView === "config") render();
+    }
+  }, err => console.error("Erro ao sincronizar config:", err));
+}
 
 function buildRoles(){
   return [
@@ -1704,8 +1756,33 @@ function loadChecklistData(){
   } catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
-function saveChecklistData(){ localStorage.setItem(STORAGE_PREFIX + "checklist_data", JSON.stringify(DATA)); }
+function saveChecklistData(){
+  localStorage.setItem(STORAGE_PREFIX + "checklist_data", JSON.stringify(DATA));
+  if (firebaseReady){
+    db.collection("meta").doc("checklist_data").set(DATA).catch(e => console.error("Erro ao salvar itens no Firebase:", e));
+  }
+}
 let DATA = loadChecklistData();
+
+function initChecklistDataSync(){
+  if (!firebaseReady) return;
+  const ref = db.collection("meta").doc("checklist_data");
+  let seeding = false;
+  ref.onSnapshot(snap => {
+    const data = snap.exists ? snap.data() : null;
+    if (data && data.operacional && data.operacional.diario){
+      DATA = data;
+    } else if (!seeding){
+      seeding = true;
+      ref.set(DATA).catch(e => console.error("Erro ao semear itens no Firebase:", e));
+      return;
+    } else {
+      return;
+    }
+    localStorage.setItem(STORAGE_PREFIX + "checklist_data", JSON.stringify(DATA));
+    if (session && (currentView === "checklist" || currentView === "config")) render();
+  }, err => console.error("Erro ao sincronizar itens:", err));
+}
 
 const TIPO_LABEL = { diario: "Diário", semanal: "Semanal", mensal: "Mensal" };
 const TIPO_ICON = { diario: "calendar", semanal: "users", mensal: "building" };
@@ -1774,11 +1851,35 @@ auditorInput.addEventListener("input", () => {
   localStorage.setItem(STORAGE_PREFIX + "last_auditor", auditorInput.value);
 });
 
+let historicoCache = [];
+try { historicoCache = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "historico") || "[]"); } catch(e){ historicoCache = []; }
+
 function getHistorico(){
-  try { return JSON.parse(localStorage.getItem(STORAGE_PREFIX + "historico") || "[]"); } catch(e){ return []; }
+  return historicoCache;
 }
-function setHistorico(arr){
-  localStorage.setItem(STORAGE_PREFIX + "historico", JSON.stringify(arr));
+
+function docIdFor(record){
+  return (record.setor + "_" + record.tipo + "_" + record.loja + "_" + record.date)
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function saveHistoricoRecord(record){
+  historicoCache = historicoCache.filter(r => !(r.setor === record.setor && r.tipo === record.tipo && r.loja === record.loja && r.date === record.date));
+  historicoCache.push(record);
+  localStorage.setItem(STORAGE_PREFIX + "historico", JSON.stringify(historicoCache));
+  if (firebaseReady){
+    db.collection("historico").doc(docIdFor(record)).set(record).catch(e => console.error("Erro ao salvar histórico no Firebase:", e));
+  }
+}
+
+function setupHistoricoSync(){
+  if (!firebaseReady) return;
+  db.collection("historico").onSnapshot(snap => {
+    historicoCache = snap.docs.map(d => d.data());
+    localStorage.setItem(STORAGE_PREFIX + "historico", JSON.stringify(historicoCache));
+    if (currentView === "historico" || currentView === "dashboard") render();
+  }, err => console.error("Erro ao sincronizar histórico:", err));
 }
 
 function draftKey(tab, loja, dateStr){
@@ -2442,11 +2543,8 @@ document.getElementById("btnSave").addEventListener("click", () => {
     sections: sum.sections,
     pendentes: sum.pendentes
   };
-  let hist = getHistorico();
-  hist = hist.filter(r => !(r.setor === record.setor && r.tipo === record.tipo && r.loja === record.loja && r.date === record.date));
-  hist.push(record);
-  setHistorico(hist);
-  showToast(`Salvo às ${fmtHora(record.savedAt)} — ${sum.pct}% concluído`);
+  saveHistoricoRecord(record);
+  showToast(`Salvo às ${fmtHora(record.savedAt)} — ${sum.pct}% concluído${firebaseReady ? "" : " (offline)"}`);
 });
 
 document.getElementById("btnReset").addEventListener("click", () => {
@@ -2544,6 +2642,10 @@ if (session){
 } else {
   document.getElementById("loginScreen").style.display = "flex";
 }
+
+initAppConfigSync();
+initChecklistDataSync();
+setupHistoricoSync();
 
 if ("serviceWorker" in navigator){
   window.addEventListener("load", () => {
