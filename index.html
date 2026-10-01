@@ -2214,6 +2214,9 @@ function saveSectionNotes(tab, notes){
 function itemId(sectionId, groupIdx, idx){
   return sectionId + "__g" + groupIdx + "__" + idx;
 }
+function groupKey(sectionId, groupIdx){
+  return sectionId + "__g" + groupIdx;
+}
 
 function summarize(tab, checks){
   const sections = DATA[currentSector][tab];
@@ -2263,6 +2266,12 @@ function renderSection(section, checks){
             <button class="attach-remove" data-remove-item="${id}" data-remove-idx="${fi}" title="Remover">×</button>
           </a>`).join("")}</div>` : ""}`;
     });
+    const gk = groupKey(section.id, gi);
+    itemsHtml += `
+      <div class="section-note-block">
+        <label class="ata-label">Observações${g.sub ? " — " + g.sub : ""}</label>
+        <textarea class="section-note-textarea" data-group-note="${gk}" placeholder="Alguma observação sobre este grupo de itens...">${(sectionNotes[gk]||"")}</textarea>
+      </div>`;
   });
 
   const total = section.groups.reduce((a,g)=>a+g.items.length,0);
@@ -2285,10 +2294,6 @@ function renderSection(section, checks){
       </div>
       <div class="section-body ${isCollapsed ? 'hidden' : ''}" id="body_${section.id}">
         ${itemsHtml}
-        <div class="section-note-block">
-          <label class="ata-label">Observações</label>
-          <textarea class="section-note-textarea" data-section-note="${section.id}" placeholder="Alguma observação sobre esta rotina...">${(sectionNotes[section.id]||"")}</textarea>
-        </div>
       </div>
     </div>`;
 }
@@ -2494,7 +2499,7 @@ function printRecord(recordId){
   const anexosHtml = r.anexosCount ? `<tr><td style="padding:5px 0;color:#6B7280;">Anexos</td><td style="font-weight:700;">${r.anexosCount} arquivo(s) — ver no app (Histórico)</td></tr>` : "";
   const observacoesHtml = (r.observacoes && r.observacoes.length) ? r.observacoes.map(o => `
     <div style="margin-bottom:10px;padding:10px 12px;border:1px solid #E7E9F0;border-radius:8px;">
-      <div style="font-weight:800;font-size:11.5px;color:#0A29B5;margin-bottom:4px;">${o.secao}</div>
+      <div style="font-weight:800;font-size:11.5px;color:#0A29B5;margin-bottom:4px;">${o.secao}${o.grupo ? " — " + o.grupo : ""}</div>
       <div style="font-size:12px;">${o.texto}</div>
     </div>`).join("") : "";
   document.getElementById("printArea").innerHTML = `
@@ -3067,7 +3072,7 @@ function attachChecklistHandlers(){
   document.querySelectorAll(".section-note-textarea").forEach(ta => {
     ta.addEventListener("input", () => {
       const notes = loadSectionNotes(currentTab);
-      notes[ta.getAttribute("data-section-note")] = ta.value;
+      notes[ta.getAttribute("data-group-note")] = ta.value;
       saveSectionNotes(currentTab, notes);
     });
   });
@@ -3156,8 +3161,10 @@ function collectSectionNotesForRecord(tab){
   const sections = DATA[currentSector][tab];
   const out = [];
   sections.forEach(s => {
-    const texto = (notes[s.id] || "").trim();
-    if (texto) out.push({ secao: s.title, texto });
+    s.groups.forEach((g, gi) => {
+      const texto = (notes[groupKey(s.id, gi)] || "").trim();
+      if (texto) out.push({ secao: s.title, grupo: g.sub || "", texto });
+    });
   });
   return out;
 }
