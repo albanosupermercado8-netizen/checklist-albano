@@ -626,23 +626,22 @@
     justify-content:center;
   }
 
-  .ata-box{
-    margin:10px 3px 14px;
-    padding:12px 13px;
-    border-radius:12px;
-    background:var(--blue-light);
-    border:1.5px dashed #B9C8EE;
+  .pauta-form{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:var(--shadow-md);
+    border:1px solid var(--border);
   }
-  .ata-title{
+  .pauta-form-title{
     display:flex;
     align-items:center;
-    gap:7px;
-    font-size:11.5px;
+    gap:8px;
+    font-size:14px;
     font-weight:800;
     color:var(--navy);
-    text-transform:uppercase;
-    letter-spacing:.3px;
-    margin-bottom:8px;
+    margin-bottom:12px;
   }
   .ata-label{
     display:block;
@@ -1827,7 +1826,7 @@ const DEFAULT_DATA = {
           "Liberar lotes no sistema.",
           "Verificar divergências de preços."
         ]},
-        { sub: "Gestão da Equipe — 6h55min", meeting: true, note: "Nesta reunião, abordar por exemplo:", items: [
+        { sub: "Gestão da Equipe — 6h55min", note: "Nesta reunião, abordar por exemplo:", items: [
           "Realizar reunião matinal.",
           "Metas do dia.",
           "Promoções vigentes.",
@@ -1922,7 +1921,7 @@ const DEFAULT_DATA = {
     {
       id: "reuniao_liderancas", title: "Reunião com as Lideranças", time: null, icon: "users",
       groups: [
-        { sub: "Pauta Sugerida", meeting: true, items: [
+        { sub: "Pauta Sugerida", items: [
           "Indicadores.",
           "Resultados.",
           "Problemas da semana.",
@@ -1938,7 +1937,7 @@ const DEFAULT_DATA = {
     {
       id: "reuniao_direcao", title: "Reunião com a Direção", time: null, icon: "building",
       groups: [
-        { sub: "Apresentar", meeting: true, items: [
+        { sub: "Apresentar", items: [
           "Resultados da loja.",
           "Principais desafios.",
           "Necessidades operacionais.",
@@ -1954,7 +1953,7 @@ const DEFAULT_DATA = {
     {
       id: "reuniao_integrada", title: "Reunião Integrada dos Três Gerentes", time: null, icon: "layers",
       groups: [
-        { sub: "Objetivos", meeting: true, items: [
+        { sub: "Objetivos", items: [
           "Compartilhar boas práticas.",
           "Apresentar resultados de cada unidade.",
           "Discutir dificuldades.",
@@ -2011,26 +2010,6 @@ function saveChecklistData(){
 }
 let DATA = loadChecklistData();
 
-const MEETING_GROUP_TARGETS = [
-  { sector: "operacional", tipo: "diario", sectionId: "manha", groupSub: "Gestão da Equipe — 6h55min" },
-  { sector: "operacional", tipo: "semanal", sectionId: "reuniao_liderancas", groupSub: "Pauta Sugerida" },
-  { sector: "operacional", tipo: "semanal", sectionId: "reuniao_direcao", groupSub: "Apresentar" },
-  { sector: "operacional", tipo: "mensal", sectionId: "reuniao_integrada", groupSub: "Objetivos" }
-];
-function ensureMeetingFlags(){
-  let changed = false;
-  MEETING_GROUP_TARGETS.forEach(t => {
-    const sections = DATA[t.sector] && DATA[t.sector][t.tipo];
-    if (!sections) return;
-    const sec = sections.find(s => s.id === t.sectionId);
-    if (!sec) return;
-    const grp = sec.groups.find(g => g.sub === t.groupSub);
-    if (grp && !grp.meeting){ grp.meeting = true; changed = true; }
-  });
-  return changed;
-}
-if (ensureMeetingFlags()) saveChecklistData();
-
 function initChecklistDataSync(){
   if (!firebaseReady) return;
   const ref = db.collection("meta").doc("checklist_data");
@@ -2046,7 +2025,6 @@ function initChecklistDataSync(){
     } else {
       return;
     }
-    if (ensureMeetingFlags()) saveChecklistData();
     localStorage.setItem(STORAGE_PREFIX + "checklist_data", JSON.stringify(DATA));
     if (session && (currentView === "checklist" || currentView === "config")) render();
   }, err => console.error("Erro ao sincronizar itens:", err));
@@ -2161,6 +2139,30 @@ function setupHistoricoSync(){
   }, err => console.error("Erro ao sincronizar histórico:", err));
 }
 
+let pautasCache = [];
+try { pautasCache = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "pautas") || "[]"); } catch(e){ pautasCache = []; }
+
+function getPautas(){
+  return pautasCache;
+}
+
+function savePautaRecord(record){
+  pautasCache.push(record);
+  localStorage.setItem(STORAGE_PREFIX + "pautas", JSON.stringify(pautasCache));
+  if (firebaseReady){
+    db.collection("pautas").doc(record.id).set(record).catch(e => console.error("Erro ao salvar pauta no Firebase:", e));
+  }
+}
+
+function setupPautasSync(){
+  if (!firebaseReady) return;
+  db.collection("pautas").onSnapshot(snap => {
+    pautasCache = snap.docs.map(d => d.data());
+    localStorage.setItem(STORAGE_PREFIX + "pautas", JSON.stringify(pautasCache));
+    if (currentView === "pautas") render();
+  }, err => console.error("Erro ao sincronizar pautas:", err));
+}
+
 function draftKey(tab, loja, dateStr){
   return STORAGE_PREFIX + "draft_" + currentSector + "_" + tab + "_" + loja + "_" + dateStr;
 }
@@ -2182,20 +2184,8 @@ function saveAttachments(tab, atts){
   localStorage.setItem(key, JSON.stringify(atts));
 }
 
-function loadMeetingNotes(tab){
-  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_ata";
-  try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch(e){ return {}; }
-}
-function saveMeetingNotes(tab, notes){
-  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_ata";
-  localStorage.setItem(key, JSON.stringify(notes));
-}
-
 function itemId(sectionId, groupIdx, idx){
   return sectionId + "__g" + groupIdx + "__" + idx;
-}
-function groupKey(sectionId, groupIdx){
-  return sectionId + "__g" + groupIdx;
 }
 
 function summarize(tab, checks){
@@ -2220,7 +2210,6 @@ function summarize(tab, checks){
 function renderSection(section, checks){
   const isCollapsed = !!collapsedState[section.id];
   const atts = loadAttachments(currentTab);
-  const notes = loadMeetingNotes(currentTab);
   let itemsHtml = "";
   section.groups.forEach((g, gi) => {
     if (g.sub) itemsHtml += `<div class="subheader">${g.sub}</div>`;
@@ -2246,22 +2235,6 @@ function renderSection(section, checks){
             <button class="attach-remove" data-remove-item="${id}" data-remove-idx="${fi}" title="Remover">×</button>
           </a>`).join("")}</div>` : ""}`;
     });
-    if (g.meeting){
-      const gk = groupKey(section.id, gi);
-      const n = notes[gk] || {};
-      itemsHtml += `
-        <div class="ata-box" data-ata-group="${gk}">
-          <div class="ata-title">${icon("clipboard",14,2)} Pauta e Ata da Reunião</div>
-          <label class="ata-label">Participantes</label>
-          <input type="text" class="ata-input" data-ata-field="participantes" data-ata-group="${gk}" value="${(n.participantes||"").replace(/"/g,"&quot;")}" placeholder="Nomes separados por vírgula">
-          <label class="ata-label">Pauta (assuntos a tratar)</label>
-          <textarea class="ata-textarea" data-ata-field="pauta" data-ata-group="${gk}" placeholder="Lista dos assuntos que serão discutidos nessa reunião...">${n.pauta||""}</textarea>
-          <label class="ata-label">Decisões tomadas</label>
-          <textarea class="ata-textarea" data-ata-field="decisoes" data-ata-group="${gk}" placeholder="O que foi decidido nessa reunião...">${n.decisoes||""}</textarea>
-          <label class="ata-label">Próximos passos / Ações</label>
-          <textarea class="ata-textarea" data-ata-field="proximosPassos" data-ata-group="${gk}" placeholder="O que precisa ser feito até a próxima reunião...">${n.proximosPassos||""}</textarea>
-        </div>`;
-    }
   });
 
   const total = section.groups.reduce((a,g)=>a+g.items.length,0);
@@ -2353,7 +2326,6 @@ function renderHistorico(){
           ${r.pendentes.length ? `<div class="hist-pendentes"><strong>${r.pendentes.length} pendente(s):</strong> ${r.pendentes.slice(0,3).join(" · ")}${r.pendentes.length>3 ? "…" : ""}</div>` : ""}
           <div class="hist-badges">
             ${r.anexosCount ? `<span class="hist-badge">${icon("paperclip",12,2)} ${r.anexosCount}</span>` : ""}
-            ${r.ata && r.ata.length ? `<span class="hist-badge">${icon("clipboard",12,2)} Ata</span>` : ""}
             ${r.geo ? `<span class="hist-badge good">${icon("mapPin",12,2)} ${r.geo.distFromLoja}m</span>` : ""}
           </div>
           <button class="hist-pdf-btn" data-print-id="${r.id}">${icon("printer",13,2)} Gerar PDF</button>
@@ -2377,11 +2349,31 @@ function attachHistFilterHandlers(){
 
 function renderPautas(){
   const scoped = isGerente();
-  let recs = getHistorico().filter(r => r.ata && r.ata.length);
+
+  let html = `<div class="pauta-form">
+    <div class="pauta-form-title">${icon("clipboard",16,2)} Nova Pauta de Reunião</div>
+    <label class="ata-label">Loja</label>
+    ${scoped
+      ? `<input type="text" class="ata-input" id="pautaLojaField" value="${session.loja}" disabled>`
+      : `<select class="ata-input" id="pautaLojaField">${LOJAS.map(l => `<option value="${l}">${l}</option>`).join("")}</select>`}
+    <label class="ata-label">Responsável</label>
+    <input type="text" class="ata-input" id="pautaResponsavel" placeholder="Seu nome" value="${(auditorInput.value || "").replace(/"/g,"&quot;")}">
+    <label class="ata-label">Participantes</label>
+    <input type="text" class="ata-input" id="pautaParticipantes" placeholder="Nomes separados por vírgula">
+    <label class="ata-label">Assunto</label>
+    <textarea class="ata-textarea" id="pautaAssunto" placeholder="Sobre o que foi essa reunião..."></textarea>
+    <label class="ata-label">Decisões tomadas</label>
+    <textarea class="ata-textarea" id="pautaDecisoes" placeholder="O que foi decidido..."></textarea>
+    <label class="ata-label">Próximos passos / Ações</label>
+    <textarea class="ata-textarea" id="pautaProximosPassos" placeholder="O que precisa ser feito até a próxima reunião..."></textarea>
+    <button class="cfg-save-btn" id="btnSavePauta">${icon("check",15,2.6)} Salvar Pauta</button>
+  </div>`;
+
+  let recs = getPautas().slice();
   if (scoped) recs = recs.filter(r => r.loja === session.loja);
   recs.sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
 
-  let html = `<div class="filter-row">
+  html += `<div class="filter-row">
     <select id="pautasLojaFilter" ${scoped ? "disabled" : ""}>
       ${scoped ? `<option value="${session.loja}" selected>${session.loja}</option>` : `
       <option value="todas">Todas as lojas</option>
@@ -2392,35 +2384,29 @@ function renderPautas(){
   const filtered = recs.filter(r => pautasFilterLoja === "todas" || r.loja === pautasFilterLoja);
 
   if (!filtered.length){
-    html += emptyState("clipboard", "Nenhuma ata de reunião salva ainda", "<span>As pautas aparecem aqui assim que alguém preenche e salva um checklist com reunião.</span>");
-    document.getElementById("main").innerHTML = html;
-    attachPautasFilterHandlers();
-    return;
-  }
-
-  filtered.forEach(r => {
-    r.ata.forEach(a => {
+    html += emptyState("clipboard", "Nenhuma pauta salva ainda", "<span>Preencha o formulário acima e clique em \"Salvar Pauta\".</span>");
+  } else {
+    filtered.forEach(r => {
       html += `
         <div class="hist-card pauta-card">
           <div class="hist-icon">${icon("clipboard", 18, 2)}</div>
           <div class="hist-body">
             <div class="hist-top">
               <div>
-                <span class="hist-tipo">${TIPO_LABEL[r.tipo]}</span>
-                <div class="hist-loja">${a.secao} — ${a.grupo}</div>
-                <div class="hist-meta">${fmtDate(r.date)} às ${fmtHora(r.savedAt)} · ${r.loja} · ${r.auditor}</div>
+                <div class="hist-loja">${r.loja}</div>
+                <div class="hist-meta">${fmtDate(r.date)} às ${fmtHora(r.savedAt)} · ${r.auditor}</div>
               </div>
             </div>
             <div class="pauta-detail">
-              <div><strong>Participantes:</strong> ${a.participantes || "—"}</div>
-              <div><strong>Pauta:</strong> ${a.pauta || "—"}</div>
-              <div><strong>Decisões:</strong> ${a.decisoes || "—"}</div>
-              <div><strong>Próximos passos:</strong> ${a.proximosPassos || "—"}</div>
+              <div><strong>Participantes:</strong> ${r.participantes || "—"}</div>
+              <div><strong>Assunto:</strong> ${r.assunto || "—"}</div>
+              <div><strong>Decisões:</strong> ${r.decisoes || "—"}</div>
+              <div><strong>Próximos passos:</strong> ${r.proximosPassos || "—"}</div>
             </div>
           </div>
         </div>`;
     });
-  });
+  }
 
   document.getElementById("main").innerHTML = html;
   attachPautasFilterHandlers();
@@ -2429,6 +2415,35 @@ function renderPautas(){
 function attachPautasFilterHandlers(){
   const lf = document.getElementById("pautasLojaFilter");
   if (lf) lf.addEventListener("change", () => { pautasFilterLoja = lf.value; renderPautas(); });
+
+  document.getElementById("btnSavePauta").addEventListener("click", () => {
+    const loja = document.getElementById("pautaLojaField").value;
+    const responsavel = document.getElementById("pautaResponsavel").value.trim();
+    const participantes = document.getElementById("pautaParticipantes").value.trim();
+    const assunto = document.getElementById("pautaAssunto").value.trim();
+    const decisoes = document.getElementById("pautaDecisoes").value.trim();
+    const proximosPassos = document.getElementById("pautaProximosPassos").value.trim();
+
+    if (!responsavel){
+      showToast("Informe o nome do responsável antes de salvar.");
+      return;
+    }
+    if (!assunto && !decisoes && !participantes){
+      showToast("Preencha ao menos participantes, assunto ou decisões.");
+      return;
+    }
+
+    const record = {
+      id: Date.now() + "_" + Math.random().toString(36).slice(2,8),
+      loja, auditor: responsavel, participantes, assunto, decisoes, proximosPassos,
+      date: todayStr(),
+      savedAt: new Date().toISOString()
+    };
+    savePautaRecord(record);
+    localStorage.setItem(STORAGE_PREFIX + "last_auditor", responsavel);
+    showToast("Pauta salva!");
+    renderPautas();
+  });
 }
 
 function printRecord(recordId){
@@ -2442,14 +2457,6 @@ function printRecord(recordId){
       <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;">${s.title}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;text-align:right;font-weight:700;">${s.done}/${s.total}</td>
     </tr>`).join("");
-  const ataHtml = (r.ata && r.ata.length) ? r.ata.map(a => `
-    <div style="margin-bottom:14px;padding:12px;border:1px solid #E7E9F0;border-radius:8px;">
-      <div style="font-weight:800;font-size:12.5px;margin-bottom:6px;">${a.secao} — ${a.grupo}</div>
-      <div style="font-size:12px;margin-bottom:4px;"><strong>Participantes:</strong> ${a.participantes || "—"}</div>
-      <div style="font-size:12px;margin-bottom:4px;"><strong>Pauta:</strong> ${a.pauta || "—"}</div>
-      <div style="font-size:12px;margin-bottom:4px;"><strong>Decisões:</strong> ${a.decisoes || "—"}</div>
-      <div style="font-size:12px;"><strong>Próximos passos:</strong> ${a.proximosPassos || "—"}</div>
-    </div>`).join("") : "";
   const geoHtml = r.geo ? `<tr><td style="padding:5px 0;color:#6B7280;">Localização no envio</td><td style="font-weight:700;">${r.geo.distFromLoja}m da loja (dentro do raio permitido)</td></tr>` : "";
   const anexosHtml = r.anexosCount ? `<tr><td style="padding:5px 0;color:#6B7280;">Anexos</td><td style="font-weight:700;">${r.anexosCount} arquivo(s) — ver no app (Histórico)</td></tr>` : "";
   document.getElementById("printArea").innerHTML = `
@@ -2474,7 +2481,6 @@ function printRecord(recordId){
       </table>
       <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Detalhamento por seção</h3>
       <table style="width:100%;border-collapse:collapse;margin-bottom:22px;">${sectionsHtml}</table>
-      ${ataHtml ? `<h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Ata de Reunião</h3>${ataHtml}` : ""}
       <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Itens pendentes</h3>
       ${pendentesHtml}
       <p style="margin-top:36px;font-size:10.5px;color:#9AA3B2;">Documento gerado em ${new Date().toLocaleString("pt-BR")} — Falcioni Consultoria</p>
@@ -3019,16 +3025,6 @@ function attachChecklistHandlers(){
     });
   });
 
-  document.querySelectorAll(".ata-input, .ata-textarea").forEach(inp => {
-    inp.addEventListener("input", () => {
-      const notes = loadMeetingNotes(currentTab);
-      const gk = inp.getAttribute("data-ata-group");
-      const field = inp.getAttribute("data-ata-field");
-      if (!notes[gk]) notes[gk] = {};
-      notes[gk][field] = inp.value;
-      saveMeetingNotes(currentTab, notes);
-    });
-  });
 }
 
 document.getElementById("fileInputHidden").addEventListener("change", async (e) => {
@@ -3102,23 +3098,6 @@ function haversineDistance(lat1, lng1, lat2, lng2){
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function collectMeetingNotesForRecord(tab){
-  const notes = loadMeetingNotes(tab);
-  const sections = DATA[currentSector][tab];
-  const out = [];
-  sections.forEach(s => {
-    s.groups.forEach((g, gi) => {
-      if (!g.meeting) return;
-      const gk = groupKey(s.id, gi);
-      const n = notes[gk];
-      if (n && (n.participantes || n.pauta || n.decisoes || n.proximosPassos)){
-        out.push({ secao: s.title, grupo: g.sub, participantes: n.participantes || "", pauta: n.pauta || "", decisoes: n.decisoes || "", proximosPassos: n.proximosPassos || "" });
-      }
-    });
-  });
-  return out;
-}
-
 function collectAttachmentsForRecord(tab){
   const atts = loadAttachments(tab);
   let count = 0;
@@ -3161,7 +3140,6 @@ document.getElementById("btnSave").addEventListener("click", async () => {
 
   const checks = loadChecks(currentTab);
   const sum = summarize(currentTab, checks);
-  const ata = collectMeetingNotesForRecord(currentTab);
   const anexos = collectAttachmentsForRecord(currentTab);
   const record = {
     id: Date.now() + "_" + Math.random().toString(36).slice(2,8),
@@ -3176,7 +3154,6 @@ document.getElementById("btnSave").addEventListener("click", async () => {
     pct: sum.pct,
     sections: sum.sections,
     pendentes: sum.pendentes,
-    ata: ata,
     anexosCount: anexos.count,
     anexos: anexos.byItem,
     geo: geo
@@ -3284,6 +3261,7 @@ if (session){
 initAppConfigSync();
 initChecklistDataSync();
 setupHistoricoSync();
+setupPautasSync();
 
 if ("serviceWorker" in navigator){
   let reloadedOnce = false;
