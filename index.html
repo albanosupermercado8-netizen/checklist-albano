@@ -346,7 +346,8 @@
     font-weight:600;
     font-family:inherit;
   }
-  .date-picker input::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.7;}
+  .date-picker input::-webkit-calendar-picker-indicator{display:none;}
+  .date-picker input:disabled{ opacity:1; -webkit-text-fill-color:#fff; cursor:default; }
 
   .pill-tabs{
     display:flex;
@@ -528,17 +529,122 @@
     line-height:1.4;
   }
 
+  .check-item-row{
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    border-bottom:1px solid #F1F2F6;
+  }
+  .check-item-row:last-child{border-bottom:none;}
+  .check-item-row:has(+ .attach-thumbs){ border-bottom:none; }
   .check-item{
     display:flex;
     align-items:flex-start;
     gap:11px;
     padding:9px 3px;
-    border-bottom:1px solid #F1F2F6;
+    flex:1;
+    min-width:0;
     cursor:pointer;
     user-select:none;
   }
-  .check-item:last-child{border-bottom:none;}
   .check-item input{ display:none; }
+  .attach-btn{
+    display:flex;
+    align-items:center;
+    gap:3px;
+    flex-shrink:0;
+    margin-top:7px;
+    padding:5px 7px;
+    border-radius:8px;
+    border:1.5px solid var(--border);
+    background:#fff;
+    color:var(--gray-dim);
+  }
+  .attach-btn.has-files{
+    border-color:var(--blue);
+    background:var(--blue-light);
+    color:var(--blue);
+  }
+  .attach-count{
+    font-size:10px;
+    font-weight:800;
+  }
+  .attach-thumbs{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    padding:0 3px 10px 36px;
+    border-bottom:1px solid #F1F2F6;
+  }
+  .attach-thumb{
+    position:relative;
+    width:52px;
+    height:52px;
+    border-radius:9px;
+    overflow:hidden;
+    background:var(--gray-light);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--gray-dim);
+  }
+  .attach-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .attach-remove{
+    position:absolute;
+    top:-2px; right:-2px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:var(--danger);
+    color:#fff;
+    border:2px solid #fff;
+    font-size:11px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .ata-box{
+    margin:10px 3px 14px;
+    padding:12px 13px;
+    border-radius:12px;
+    background:var(--blue-light);
+    border:1.5px dashed #B9C8EE;
+  }
+  .ata-title{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:11.5px;
+    font-weight:800;
+    color:var(--navy);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin-bottom:8px;
+  }
+  .ata-label{
+    display:block;
+    font-size:10px;
+    font-weight:700;
+    color:var(--gray);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin:8px 0 3px;
+  }
+  .ata-input, .ata-textarea{
+    width:100%;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #C7D2E0;
+    background:#fff;
+    font-size:12.5px;
+    font-family:inherit;
+    color:var(--ink);
+    resize:vertical;
+  }
+  .ata-textarea{ min-height:56px; }
+  .ata-input:focus, .ata-textarea:focus{ outline:none; border-color:var(--blue); }
   .box{
     width:22px;
     height:22px;
@@ -922,6 +1028,24 @@
   }
 
   /* ---------- Config (Diretor) ---------- */
+  .hist-badges{
+    display:flex;
+    gap:6px;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  .hist-badge{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    padding:3px 8px;
+    border-radius:20px;
+    background:var(--gray-light);
+    color:var(--gray);
+    font-size:10.5px;
+    font-weight:700;
+  }
+  .hist-badge.good{ background:var(--green-light); color:var(--green); }
   .hist-pdf-btn{
     display:flex;
     align-items:center;
@@ -974,14 +1098,72 @@
     background:#fff;
   }
   .cfg-row input:focus, .cfg-gerente-row input:focus{ outline:none; border-color:var(--blue); }
+  .cfg-gerente-card{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:11px;
+    margin-bottom:10px;
+    background:var(--gray-light);
+  }
   .cfg-gerente-row{
     display:flex;
     gap:8px;
-    margin-bottom:9px;
+    margin-bottom:0;
     align-items:center;
   }
   .cfg-gerente-row .cfg-loja-input{ flex:1.3; }
   .cfg-gerente-row .cfg-pass-input{ flex:1; }
+  .cfg-geo-row{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px dashed var(--border);
+  }
+  .cfg-geo-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--blue);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin-bottom:7px;
+  }
+  .cfg-geo-fields{
+    display:flex;
+    gap:6px;
+  }
+  .cfg-geo-fields input{
+    flex:1;
+    min-width:0;
+    padding:8px 9px;
+    border-radius:8px;
+    border:1.5px solid var(--border);
+    font-size:12px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--ink);
+  }
+  .cfg-geo-fields input:focus{ outline:none; border-color:var(--blue); }
+  .cfg-radius-input{ max-width:66px; flex:none !important; }
+  .cfg-geo-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:36px; height:36px;
+    min-width:36px;
+    border-radius:8px;
+    border:1.5px solid var(--blue-light);
+    background:var(--blue-light);
+    color:var(--blue);
+  }
+  .cfg-geo-hint{
+    display:block;
+    font-size:10px;
+    color:var(--gray);
+    margin-top:6px;
+    font-weight:500;
+  }
   .cfg-del-btn, .cfg-item-del{
     display:flex;
     align-items:center;
@@ -1373,8 +1555,8 @@
   <div class="subnav-row" id="subnavRow">
     <div class="pill-tabs" id="pillTabsWrap"></div>
     <div class="date-picker" id="datePickerWrap">
-      <span class="ic" id="icCalendar"></span>
-      <input type="date" id="dateInput">
+      <span class="ic" id="icLock"></span>
+      <input type="date" id="dateInput" disabled title="Travado em hoje — não é possível preencher dias retroativos">
     </div>
   </div>
 
@@ -1416,11 +1598,13 @@
 </div>
 
 <div id="printArea"></div>
+<input type="file" id="fileInputHidden" accept="image/*,application/pdf" multiple style="display:none;">
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 <script>
-/* ---------- Firebase (Firestore) ---------- */
+/* ---------- Firebase (Firestore + Storage) ---------- */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyA7pHg62mWWxMQvjwXYHG-BFhJhsTZwirU",
   authDomain: "checklist-gerencial.firebaseapp.com",
@@ -1430,10 +1614,12 @@ const FIREBASE_CONFIG = {
   appId: "1:775428685906:web:d040ae84f369ab7ca71f8b"
 };
 let db = null;
+let storageRef = null;
 let firebaseReady = false;
 try {
   firebase.initializeApp(FIREBASE_CONFIG);
   db = firebase.firestore();
+  storageRef = firebase.storage();
   firebaseReady = true;
 } catch(e){
   console.error("Firebase init falhou, app continua em modo local:", e);
@@ -1471,7 +1657,12 @@ const ICON_PATHS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   trash: '<path d="M4 7h16"/><path d="M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7"/><path d="M6 7l1 13a1.5 1.5 0 0 0 1.5 1.4h7a1.5 1.5 0 0 0 1.5-1.4L18 7"/><path d="M10 11v6M14 11v6"/>',
   printer: '<path d="M6 9V4h12v5"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M6 15h12v6H6z"/>',
-  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12 20 3M17 6l2.5 2.5M14.5 8.5 17 11"/>'
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12 20 3M17 6l2.5 2.5M14.5 8.5 17 11"/>',
+  camera: '<path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1-2h7l1 2h2A1.5 1.5 0 0 1 20 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18Z"/><circle cx="12" cy="13" r="3.4"/>',
+  mapPin: '<path d="M12 21s7-7.8 7-12.5a7 7 0 1 0-14 0C5 13.2 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.6"/>',
+  users2: '<circle cx="8.5" cy="8" r="3.1"/><path d="M2.5 19.5c0-3.3 2.7-5.3 6-5.3s6 2 6 5.3"/>',
+  clipboard: '<rect x="6" y="4" width="12" height="17" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
 };
 function icon(name, size, strokeW){
   size = size || 20;
@@ -1487,11 +1678,21 @@ const STORAGE_PREFIX = "checklist_albano_";
 const DEFAULT_APP_CONFIG = {
   diretorPassword: "diretor2026",
   gerentes: [
-    { id: "matriz_barro", loja: "Matriz Barro", password: "matriz123" },
-    { id: "filial_barro", loja: "Filial Barro", password: "filialbarro123" },
-    { id: "filial_lavras", loja: "Filial Lavras da Mangabeira", password: "lavras123" }
+    { id: "matriz_barro", loja: "Matriz Barro", password: "matriz123", lat: null, lng: null, radius: 150 },
+    { id: "filial_barro", loja: "Filial Barro", password: "filialbarro123", lat: null, lng: null, radius: 150 },
+    { id: "filial_lavras", loja: "Filial Lavras da Mangabeira", password: "lavras123", lat: null, lng: null, radius: 150 }
   ]
 };
+
+function ensureGerenteExtras(){
+  let changed = false;
+  APP_CONFIG.gerentes.forEach(g => {
+    if (!("lat" in g)) { g.lat = null; changed = true; }
+    if (!("lng" in g)) { g.lng = null; changed = true; }
+    if (!("radius" in g)) { g.radius = 150; changed = true; }
+  });
+  return changed;
+}
 
 function loadAppConfig(){
   try {
@@ -1522,6 +1723,7 @@ function initAppConfigSync(){
     } else {
       return;
     }
+    if (ensureGerenteExtras()) saveAppConfig();
     localStorage.setItem(STORAGE_PREFIX + "app_config", JSON.stringify(APP_CONFIG));
     refreshConfigDerived();
     rebuildLoginRoleOptions();
@@ -1544,6 +1746,7 @@ function refreshConfigDerived(){
 }
 
 let APP_CONFIG = loadAppConfig();
+ensureGerenteExtras();
 let LOJAS = APP_CONFIG.gerentes.map(g => g.loja);
 let ROLES = buildRoles();
 
@@ -1580,7 +1783,7 @@ const DEFAULT_DATA = {
           "Liberar lotes no sistema.",
           "Verificar divergências de preços."
         ]},
-        { sub: "Gestão da Equipe — 6h55min", note: "Nesta reunião, abordar por exemplo:", items: [
+        { sub: "Gestão da Equipe — 6h55min", meeting: true, note: "Nesta reunião, abordar por exemplo:", items: [
           "Realizar reunião matinal.",
           "Metas do dia.",
           "Promoções vigentes.",
@@ -1675,7 +1878,7 @@ const DEFAULT_DATA = {
     {
       id: "reuniao_liderancas", title: "Reunião com as Lideranças", time: null, icon: "users",
       groups: [
-        { sub: "Pauta Sugerida", items: [
+        { sub: "Pauta Sugerida", meeting: true, items: [
           "Indicadores.",
           "Resultados.",
           "Problemas da semana.",
@@ -1691,7 +1894,7 @@ const DEFAULT_DATA = {
     {
       id: "reuniao_direcao", title: "Reunião com a Direção", time: null, icon: "building",
       groups: [
-        { sub: "Apresentar", items: [
+        { sub: "Apresentar", meeting: true, items: [
           "Resultados da loja.",
           "Principais desafios.",
           "Necessidades operacionais.",
@@ -1707,7 +1910,7 @@ const DEFAULT_DATA = {
     {
       id: "reuniao_integrada", title: "Reunião Integrada dos Três Gerentes", time: null, icon: "layers",
       groups: [
-        { sub: "Objetivos", items: [
+        { sub: "Objetivos", meeting: true, items: [
           "Compartilhar boas práticas.",
           "Apresentar resultados de cada unidade.",
           "Discutir dificuldades.",
@@ -1764,6 +1967,26 @@ function saveChecklistData(){
 }
 let DATA = loadChecklistData();
 
+const MEETING_GROUP_TARGETS = [
+  { sector: "operacional", tipo: "diario", sectionId: "manha", groupSub: "Gestão da Equipe — 6h55min" },
+  { sector: "operacional", tipo: "semanal", sectionId: "reuniao_liderancas", groupSub: "Pauta Sugerida" },
+  { sector: "operacional", tipo: "semanal", sectionId: "reuniao_direcao", groupSub: "Apresentar" },
+  { sector: "operacional", tipo: "mensal", sectionId: "reuniao_integrada", groupSub: "Objetivos" }
+];
+function ensureMeetingFlags(){
+  let changed = false;
+  MEETING_GROUP_TARGETS.forEach(t => {
+    const sections = DATA[t.sector] && DATA[t.sector][t.tipo];
+    if (!sections) return;
+    const sec = sections.find(s => s.id === t.sectionId);
+    if (!sec) return;
+    const grp = sec.groups.find(g => g.sub === t.groupSub);
+    if (grp && !grp.meeting){ grp.meeting = true; changed = true; }
+  });
+  return changed;
+}
+if (ensureMeetingFlags()) saveChecklistData();
+
 function initChecklistDataSync(){
   if (!firebaseReady) return;
   const ref = db.collection("meta").doc("checklist_data");
@@ -1779,6 +2002,7 @@ function initChecklistDataSync(){
     } else {
       return;
     }
+    if (ensureMeetingFlags()) saveChecklistData();
     localStorage.setItem(STORAGE_PREFIX + "checklist_data", JSON.stringify(DATA));
     if (session && (currentView === "checklist" || currentView === "config")) render();
   }, err => console.error("Erro ao sincronizar itens:", err));
@@ -1803,7 +2027,7 @@ let collapsedState = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "collapsed
 /* Static icon injections */
 document.getElementById("icStore").innerHTML = icon("store", 17);
 document.getElementById("icUser").innerHTML = icon("user", 17);
-document.getElementById("icCalendar").innerHTML = icon("calendar", 15);
+document.getElementById("icLock").innerHTML = icon("lock", 14, 2.2);
 document.getElementById("btnReset").innerHTML = icon("undo", 15, 2.2);
 document.getElementById("btnSave").innerHTML = icon("check", 17, 2.6) + "<span>Salvar checklist</span>";
 document.querySelectorAll(".nav-ic-wrap").forEach(el => {
@@ -1831,6 +2055,16 @@ function fmtHora(iso){
 
 const dateInput = document.getElementById("dateInput");
 dateInput.value = todayStr();
+
+function refreshDateIfNeeded(){
+  const t = todayStr();
+  if (dateInput.value !== t){
+    dateInput.value = t;
+    if (typeof render === "function" && session) render();
+  }
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshDateIfNeeded(); });
+setInterval(refreshDateIfNeeded, 60000);
 
 const lojaSelect = document.getElementById("lojaSelect");
 LOJAS.forEach(l => {
@@ -1894,8 +2128,29 @@ function saveChecks(tab, checks){
   localStorage.setItem(key, JSON.stringify(checks));
 }
 
+function loadAttachments(tab){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_att";
+  try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch(e){ return {}; }
+}
+function saveAttachments(tab, atts){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_att";
+  localStorage.setItem(key, JSON.stringify(atts));
+}
+
+function loadMeetingNotes(tab){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_ata";
+  try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch(e){ return {}; }
+}
+function saveMeetingNotes(tab, notes){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_ata";
+  localStorage.setItem(key, JSON.stringify(notes));
+}
+
 function itemId(sectionId, groupIdx, idx){
   return sectionId + "__g" + groupIdx + "__" + idx;
+}
+function groupKey(sectionId, groupIdx){
+  return sectionId + "__g" + groupIdx;
 }
 
 function summarize(tab, checks){
@@ -1919,6 +2174,8 @@ function summarize(tab, checks){
 
 function renderSection(section, checks){
   const isCollapsed = !!collapsedState[section.id];
+  const atts = loadAttachments(currentTab);
+  const notes = loadMeetingNotes(currentTab);
   let itemsHtml = "";
   section.groups.forEach((g, gi) => {
     if (g.sub) itemsHtml += `<div class="subheader">${g.sub}</div>`;
@@ -1926,13 +2183,38 @@ function renderSection(section, checks){
     g.items.forEach((text, idx) => {
       const id = itemId(section.id, gi, idx);
       const checked = !!checks[id];
+      const fileList = atts[id] || [];
       itemsHtml += `
-        <label class="check-item" data-item="${id}">
-          <input type="checkbox" ${checked ? "checked" : ""} data-item="${id}">
-          <span class="box">${icon("check", 13, 3)}</span>
-          <span class="txt">${text}</span>
-        </label>`;
+        <div class="check-item-row">
+          <label class="check-item" data-item="${id}">
+            <input type="checkbox" ${checked ? "checked" : ""} data-item="${id}">
+            <span class="box">${icon("check", 13, 3)}</span>
+            <span class="txt">${text}</span>
+          </label>
+          <button class="attach-btn ${fileList.length ? "has-files":""}" data-attach-item="${id}" title="Anexar foto/arquivo">
+            ${icon("camera", 15, 2)}${fileList.length ? `<span class="attach-count">${fileList.length}</span>` : ""}
+          </button>
+        </div>
+        ${fileList.length ? `<div class="attach-thumbs" data-thumbs-for="${id}">${fileList.map((f,fi) => `
+          <a class="attach-thumb" href="${f.url}" target="_blank" title="${f.name}">
+            ${f.type && f.type.startsWith("image") ? `<img src="${f.url}">` : icon("clipboard",16,2)}
+            <button class="attach-remove" data-remove-item="${id}" data-remove-idx="${fi}" title="Remover">×</button>
+          </a>`).join("")}</div>` : ""}`;
     });
+    if (g.meeting){
+      const gk = groupKey(section.id, gi);
+      const n = notes[gk] || {};
+      itemsHtml += `
+        <div class="ata-box" data-ata-group="${gk}">
+          <div class="ata-title">${icon("clipboard",14,2)} Ata da Reunião</div>
+          <label class="ata-label">Participantes</label>
+          <input type="text" class="ata-input" data-ata-field="participantes" data-ata-group="${gk}" value="${(n.participantes||"").replace(/"/g,"&quot;")}" placeholder="Nomes separados por vírgula">
+          <label class="ata-label">Decisões tomadas</label>
+          <textarea class="ata-textarea" data-ata-field="decisoes" data-ata-group="${gk}" placeholder="O que foi decidido nessa reunião...">${n.decisoes||""}</textarea>
+          <label class="ata-label">Próximos passos / Ações</label>
+          <textarea class="ata-textarea" data-ata-field="proximosPassos" data-ata-group="${gk}" placeholder="O que precisa ser feito até a próxima reunião...">${n.proximosPassos||""}</textarea>
+        </div>`;
+    }
   });
 
   const total = section.groups.reduce((a,g)=>a+g.items.length,0);
@@ -2022,6 +2304,11 @@ function renderHistorico(){
             <div class="hist-pct ${pctClass(r.pct)}">${r.pct}%</div>
           </div>
           ${r.pendentes.length ? `<div class="hist-pendentes"><strong>${r.pendentes.length} pendente(s):</strong> ${r.pendentes.slice(0,3).join(" · ")}${r.pendentes.length>3 ? "…" : ""}</div>` : ""}
+          <div class="hist-badges">
+            ${r.anexosCount ? `<span class="hist-badge">${icon("camera",12,2)} ${r.anexosCount}</span>` : ""}
+            ${r.ata && r.ata.length ? `<span class="hist-badge">${icon("clipboard",12,2)} Ata</span>` : ""}
+            ${r.geo ? `<span class="hist-badge good">${icon("mapPin",12,2)} ${r.geo.distFromLoja}m</span>` : ""}
+          </div>
           <button class="hist-pdf-btn" data-print-id="${r.id}">${icon("printer",13,2)} Gerar PDF</button>
         </div>
       </div>`;
@@ -2052,6 +2339,15 @@ function printRecord(recordId){
       <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;">${s.title}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;text-align:right;font-weight:700;">${s.done}/${s.total}</td>
     </tr>`).join("");
+  const ataHtml = (r.ata && r.ata.length) ? r.ata.map(a => `
+    <div style="margin-bottom:14px;padding:12px;border:1px solid #E7E9F0;border-radius:8px;">
+      <div style="font-weight:800;font-size:12.5px;margin-bottom:6px;">${a.secao} — ${a.grupo}</div>
+      <div style="font-size:12px;margin-bottom:4px;"><strong>Participantes:</strong> ${a.participantes || "—"}</div>
+      <div style="font-size:12px;margin-bottom:4px;"><strong>Decisões:</strong> ${a.decisoes || "—"}</div>
+      <div style="font-size:12px;"><strong>Próximos passos:</strong> ${a.proximosPassos || "—"}</div>
+    </div>`).join("") : "";
+  const geoHtml = r.geo ? `<tr><td style="padding:5px 0;color:#6B7280;">Localização no envio</td><td style="font-weight:700;">${r.geo.distFromLoja}m da loja (dentro do raio permitido)</td></tr>` : "";
+  const anexosHtml = r.anexosCount ? `<tr><td style="padding:5px 0;color:#6B7280;">Anexos</td><td style="font-weight:700;">${r.anexosCount} arquivo(s) — ver no app (Histórico)</td></tr>` : "";
   document.getElementById("printArea").innerHTML = `
     <div style="font-family:Arial,Helvetica,sans-serif;color:#1B2233;max-width:760px;margin:0 auto;padding:30px;">
       <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #0A29B5;padding-bottom:16px;margin-bottom:20px;">
@@ -2069,9 +2365,12 @@ function printRecord(recordId){
         <tr><td style="padding:5px 0;color:#6B7280;">Data do registro</td><td style="font-weight:700;">${fmtDate(r.date)}</td></tr>
         <tr><td style="padding:5px 0;color:#6B7280;">Salvo às</td><td style="font-weight:700;">${fmtHora(r.savedAt)}</td></tr>
         <tr><td style="padding:5px 0;color:#6B7280;">Resultado</td><td style="font-weight:800;font-size:17px;color:#0A29B5;">${r.done}/${r.total} itens concluídos (${r.pct}%)</td></tr>
+        ${geoHtml}
+        ${anexosHtml}
       </table>
       <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Detalhamento por seção</h3>
       <table style="width:100%;border-collapse:collapse;margin-bottom:22px;">${sectionsHtml}</table>
+      ${ataHtml ? `<h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Ata de Reunião</h3>${ataHtml}` : ""}
       <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Itens pendentes</h3>
       ${pendentesHtml}
       <p style="margin-top:36px;font-size:10.5px;color:#9AA3B2;">Documento gerado em ${new Date().toLocaleString("pt-BR")} — Falcioni Consultoria</p>
@@ -2157,6 +2456,28 @@ function renderDashboard(){
     ${recentes.length ? barChartSvg(recentes.map(r => ({label: fmtDateShort(r.date), value: r.pct})), {light:"#3D5FE0", dark:"#0A29B5"}) : '<div class="empty-hint" style="padding:10px;">Sem registros diários ainda.</div>'}
   </div>`;
 
+  if (trendTipo === "diario"){
+    const lojasParaChecar = scoped ? [session.loja] : LOJAS;
+    const DIAS_JANELA = 14;
+    const faltando = [];
+    for (let i = 1; i <= DIAS_JANELA; i++){
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const off = d.getTimezoneOffset();
+      const local = new Date(d.getTime() - off*60000);
+      const dateStr = local.toISOString().slice(0,10);
+      lojasParaChecar.forEach(l => {
+        const existe = hist.some(r => r.tipo === "diario" && r.loja === l && r.date === dateStr);
+        if (!existe) faltando.push({ date: dateStr, loja: l });
+      });
+    }
+    faltando.sort((a,b) => b.date.localeCompare(a.date));
+    html += `<div class="chart-card">
+      <h3>${icon("alert",15,2.2)}Dias sem checklist diário (últimos ${DIAS_JANELA} dias)</h3>
+      ${faltando.length ? `<ul class="pending-list">${faltando.slice(0,12).map(f => `<li><span>${fmtDate(f.date)} — ${f.loja}</span><span class="pending-count">Não respondido</span></li>`).join("")}</ul>${faltando.length > 12 ? `<div class="note" style="margin-top:8px;">+ ${faltando.length - 12} outro(s) dia(s) sem resposta.</div>` : ""}` : '<div class="empty-hint" style="padding:10px;">Nenhum dia sem checklist — parabéns!</div>'}
+    </div>`;
+  }
+
   if (!scoped){
     const lojaItems = LOJAS.map(l => ({
       label: l.replace("Filial ","F. ").replace("Matriz ","M. "),
@@ -2191,10 +2512,22 @@ function renderConfig(){
     <p class="cfg-hint">Lojas e senhas dos gestores</p>
     <div id="cfgGerentesList">
       ${APP_CONFIG.gerentes.map((g,i) => `
-        <div class="cfg-gerente-row" data-idx="${i}">
-          <input type="text" class="cfg-loja-input" value="${g.loja}" placeholder="Nome da loja">
-          <input type="text" class="cfg-pass-input" value="${g.password}" placeholder="Senha">
-          <button class="cfg-del-btn" data-idx="${i}" title="Remover loja">${icon("trash",15,2)}</button>
+        <div class="cfg-gerente-card" data-idx="${i}">
+          <div class="cfg-gerente-row">
+            <input type="text" class="cfg-loja-input" value="${g.loja}" placeholder="Nome da loja">
+            <input type="text" class="cfg-pass-input" value="${g.password}" placeholder="Senha">
+            <button class="cfg-del-btn" data-idx="${i}" title="Remover loja">${icon("trash",15,2)}</button>
+          </div>
+          <div class="cfg-geo-row">
+            <span class="cfg-geo-label">${icon("mapPin",13,2)} Localização (trava de geolocalização)</span>
+            <div class="cfg-geo-fields">
+              <input type="text" class="cfg-lat-input" data-idx="${i}" value="${g.lat ?? ""}" placeholder="Latitude">
+              <input type="text" class="cfg-lng-input" data-idx="${i}" value="${g.lng ?? ""}" placeholder="Longitude">
+              <input type="text" class="cfg-radius-input" data-idx="${i}" value="${g.radius ?? 150}" placeholder="Raio (m)">
+              <button class="cfg-geo-btn" data-idx="${i}" title="Usar minha localização atual">${icon("mapPin",14,2.4)}</button>
+            </div>
+            <span class="cfg-geo-hint">${g.lat != null && g.lng != null ? "Trava ativa — só salva checklist dentro do raio." : "Sem localização definida — trava desativada pra essa loja."}</span>
+          </div>
         </div>`).join("")}
     </div>
     <button class="cfg-add-btn" id="cfgAddGerente">${icon("plus",14,2.4)} Adicionar loja</button>
@@ -2252,7 +2585,7 @@ function renderCfgItemsArea(tipo){
 
 function attachConfigHandlers(){
   document.getElementById("cfgAddGerente").addEventListener("click", () => {
-    APP_CONFIG.gerentes.push({ id: "loja_" + Date.now(), loja: "Nova Loja", password: "123456" });
+    APP_CONFIG.gerentes.push({ id: "loja_" + Date.now(), loja: "Nova Loja", password: "123456", lat: null, lng: null, radius: 150 });
     renderConfig();
   });
 
@@ -2270,18 +2603,46 @@ function attachConfigHandlers(){
   document.getElementById("cfgSaveAccess").addEventListener("click", () => {
     const newDiretorPass = document.getElementById("cfgDiretorPass").value.trim();
     if (newDiretorPass) APP_CONFIG.diretorPassword = newDiretorPass;
-    document.querySelectorAll(".cfg-gerente-row").forEach(row => {
-      const idx = +row.getAttribute("data-idx");
-      const loja = row.querySelector(".cfg-loja-input").value.trim();
-      const pass = row.querySelector(".cfg-pass-input").value.trim();
+    document.querySelectorAll(".cfg-gerente-card").forEach(card => {
+      const idx = +card.getAttribute("data-idx");
+      const loja = card.querySelector(".cfg-loja-input").value.trim();
+      const pass = card.querySelector(".cfg-pass-input").value.trim();
+      const latStr = card.querySelector(".cfg-lat-input").value.trim();
+      const lngStr = card.querySelector(".cfg-lng-input").value.trim();
+      const radStr = card.querySelector(".cfg-radius-input").value.trim();
       if (loja) APP_CONFIG.gerentes[idx].loja = loja;
       if (pass) APP_CONFIG.gerentes[idx].password = pass;
+      APP_CONFIG.gerentes[idx].lat = latStr ? parseFloat(latStr.replace(",",".")) : null;
+      APP_CONFIG.gerentes[idx].lng = lngStr ? parseFloat(lngStr.replace(",",".")) : null;
+      APP_CONFIG.gerentes[idx].radius = radStr ? Math.max(20, parseInt(radStr, 10)) : 150;
     });
     saveAppConfig();
     refreshConfigDerived();
     rebuildLoginRoleOptions();
     applyRoleRestrictions();
     showToast("Perfis de acesso atualizados.");
+  });
+
+  document.querySelectorAll(".cfg-geo-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = btn.getAttribute("data-idx");
+      btn.disabled = true;
+      showToast("Obtendo localização atual...");
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const card = btn.closest(".cfg-gerente-card");
+          card.querySelector(".cfg-lat-input").value = pos.coords.latitude.toFixed(6);
+          card.querySelector(".cfg-lng-input").value = pos.coords.longitude.toFixed(6);
+          btn.disabled = false;
+          showToast("Localização capturada — clique em Salvar para confirmar.");
+        },
+        () => {
+          btn.disabled = false;
+          showToast("Não foi possível obter a localização. Verifique a permissão de GPS.");
+        },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+      );
+    });
   });
 
   document.querySelectorAll("#cfgSectorTabs .cfg-tipo-btn").forEach(btn => {
@@ -2493,7 +2854,75 @@ function attachChecklistHandlers(){
       updateProgress();
     });
   });
+
+  document.querySelectorAll(".attach-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("fileInputHidden");
+      fileInput.setAttribute("data-target-item", btn.getAttribute("data-attach-item"));
+      fileInput.value = "";
+      fileInput.click();
+    });
+  });
+
+  document.querySelectorAll(".attach-remove").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const itemId = btn.getAttribute("data-remove-item");
+      const idx = +btn.getAttribute("data-remove-idx");
+      const atts = loadAttachments(currentTab);
+      if (atts[itemId]){
+        atts[itemId].splice(idx, 1);
+        if (!atts[itemId].length) delete atts[itemId];
+        saveAttachments(currentTab, atts);
+        render();
+      }
+    });
+  });
+
+  document.querySelectorAll(".ata-input, .ata-textarea").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const notes = loadMeetingNotes(currentTab);
+      const gk = inp.getAttribute("data-ata-group");
+      const field = inp.getAttribute("data-ata-field");
+      if (!notes[gk]) notes[gk] = {};
+      notes[gk][field] = inp.value;
+      saveMeetingNotes(currentTab, notes);
+    });
+  });
 }
+
+document.getElementById("fileInputHidden").addEventListener("change", async (e) => {
+  const fileInput = e.target;
+  const itemId = fileInput.getAttribute("data-target-item");
+  const files = Array.from(fileInput.files || []);
+  if (!files.length || !itemId) return;
+  if (!firebaseReady || !storageRef){
+    showToast("Sem conexão com o servidor — não foi possível anexar agora.");
+    return;
+  }
+  showToast(`Enviando ${files.length} arquivo(s)...`);
+  const atts = loadAttachments(currentTab);
+  if (!atts[itemId]) atts[itemId] = [];
+  let okCount = 0;
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+  for (const file of files){
+    try {
+      const path = `anexos/${currentSector}/${lojaSelect.value}/${currentTab}/${dateInput.value}/${itemId}/${Date.now()}_${file.name}`;
+      const ref = storageRef.ref().child(path);
+      await withTimeout(ref.put(file), 25000);
+      const url = await withTimeout(ref.getDownloadURL(), 10000);
+      atts[itemId].push({ name: file.name, url, type: file.type, path });
+      okCount++;
+    } catch(err){
+      console.error("Erro ao enviar anexo:", err);
+    }
+  }
+  saveAttachments(currentTab, atts);
+  showToast(okCount === files.length ? `${okCount} arquivo(s) anexado(s)!` : `${okCount} de ${files.length} enviado(s) — verifique a conexão.`);
+  render();
+});
 
 function updateCounts(){
   const checks = loadChecks(currentTab);
@@ -2521,14 +2950,81 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
 
 dateInput.addEventListener("change", render);
 
-document.getElementById("btnSave").addEventListener("click", () => {
+function getGeoPosition(){
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation){ reject(new Error("no-geo")); return; }
+    navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
+  });
+}
+function haversineDistance(lat1, lng1, lat2, lng2){
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function collectMeetingNotesForRecord(tab){
+  const notes = loadMeetingNotes(tab);
+  const sections = DATA[currentSector][tab];
+  const out = [];
+  sections.forEach(s => {
+    s.groups.forEach((g, gi) => {
+      if (!g.meeting) return;
+      const gk = groupKey(s.id, gi);
+      const n = notes[gk];
+      if (n && (n.participantes || n.decisoes || n.proximosPassos)){
+        out.push({ secao: s.title, grupo: g.sub, participantes: n.participantes || "", decisoes: n.decisoes || "", proximosPassos: n.proximosPassos || "" });
+      }
+    });
+  });
+  return out;
+}
+
+function collectAttachmentsForRecord(tab){
+  const atts = loadAttachments(tab);
+  let count = 0;
+  Object.values(atts).forEach(arr => count += arr.length);
+  return { count, byItem: atts };
+}
+
+document.getElementById("btnSave").addEventListener("click", async () => {
   if (!auditorInput.value.trim()){
     showToast("Informe o nome do auditor antes de salvar");
     auditorInput.focus();
     return;
   }
+
+  const btnSave = document.getElementById("btnSave");
+  const lojaConf = APP_CONFIG.gerentes.find(g => g.loja === lojaSelect.value);
+  let geo = null;
+
+  if (lojaConf && lojaConf.lat != null && lojaConf.lng != null){
+    btnSave.disabled = true;
+    showToast("Verificando localização...");
+    let pos;
+    try {
+      pos = await getGeoPosition();
+    } catch(err){
+      btnSave.disabled = false;
+      showToast("Não foi possível obter sua localização. Ative o GPS e permita o acesso para salvar.");
+      return;
+    }
+    const dist = haversineDistance(pos.coords.latitude, pos.coords.longitude, lojaConf.lat, lojaConf.lng);
+    const radius = lojaConf.radius || 150;
+    if (dist > radius){
+      btnSave.disabled = false;
+      showToast(`Fora da loja (${Math.round(dist)}m de distância, limite ${radius}m) — não é possível salvar daqui.`);
+      return;
+    }
+    geo = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy, distFromLoja: Math.round(dist) };
+    btnSave.disabled = false;
+  }
+
   const checks = loadChecks(currentTab);
   const sum = summarize(currentTab, checks);
+  const ata = collectMeetingNotesForRecord(currentTab);
+  const anexos = collectAttachmentsForRecord(currentTab);
   const record = {
     id: Date.now() + "_" + Math.random().toString(36).slice(2,8),
     setor: currentSector,
@@ -2541,7 +3037,11 @@ document.getElementById("btnSave").addEventListener("click", () => {
     done: sum.done,
     pct: sum.pct,
     sections: sum.sections,
-    pendentes: sum.pendentes
+    pendentes: sum.pendentes,
+    ata: ata,
+    anexosCount: anexos.count,
+    anexos: anexos.byItem,
+    geo: geo
   };
   saveHistoricoRecord(record);
   showToast(`Salvo às ${fmtHora(record.savedAt)} — ${sum.pct}% concluído${firebaseReady ? "" : " (offline)"}`);
