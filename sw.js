@@ -1,4 +1,4 @@
-const CACHE_NAME = "checklist-albano-v22";
+const CACHE_NAME = "checklist-albano-v23";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.png", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
