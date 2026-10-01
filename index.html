@@ -349,6 +349,27 @@
   .date-picker input::-webkit-calendar-picker-indicator{display:none;}
   .date-picker input:disabled{ opacity:1; -webkit-text-fill-color:#fff; cursor:default; }
 
+  .geo-status-row{ margin-top:8px; }
+  .geo-status-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 11px;
+    border-radius:20px;
+    font-size:10.5px;
+    font-weight:700;
+  }
+  .geo-status-chip.active{
+    background:rgba(31,157,87,.22);
+    color:#B7F0CE;
+    border:1px solid rgba(31,157,87,.4);
+  }
+  .geo-status-chip.inactive{
+    background:rgba(255,255,255,.08);
+    color:rgba(255,255,255,.55);
+    border:1px solid rgba(255,255,255,.14);
+  }
+
   .pill-tabs{
     display:flex;
     gap:6px;
@@ -924,6 +945,28 @@
   }
   .hist-pendentes strong{ color:var(--ink); }
 
+  .pauta-detail{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid #F1F2F6;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .pauta-detail div{
+    font-size:12px;
+    color:#2A3348;
+    line-height:1.5;
+  }
+  .pauta-detail strong{
+    display:block;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    color:var(--blue);
+    margin-bottom:1px;
+  }
+
   /* ---------- Dashboard ---------- */
   .stat-grid{
     display:grid;
@@ -1441,6 +1484,7 @@
     .nav-btn[data-view="checklist"] .nav-ic-wrap{ color:#8FB4FF; }
     .nav-btn[data-view="historico"] .nav-ic-wrap{ color:#F0C878; }
     .nav-btn[data-view="dashboard"] .nav-ic-wrap{ color:#7CE0B0; }
+    .nav-btn[data-view="pautas"] .nav-ic-wrap{ color:#FFD37A; }
     .nav-btn[data-view="sobre"] .nav-ic-wrap{ color:#C9B8FF; }
     .nav-btn[data-view="config"] .nav-ic-wrap{ color:#FF9F6B; }
     .nav-btn.active{
@@ -1548,6 +1592,8 @@
     </div>
   </div>
 
+  <div class="geo-status-row" id="geoStatusRow"></div>
+
   <div class="subnav-row" id="subnavRow">
     <div class="pill-tabs" id="pillTabsWrap"></div>
     <div class="date-picker" id="datePickerWrap">
@@ -1580,6 +1626,7 @@
   <button class="nav-btn active" data-view="checklist"><span class="nav-ic-wrap" data-ic="checklist"></span>Checklist</button>
   <button class="nav-btn" data-view="historico"><span class="nav-ic-wrap" data-ic="history"></span>Histórico</button>
   <button class="nav-btn" data-view="dashboard"><span class="nav-ic-wrap" data-ic="dashboard"></span>Dashboard</button>
+  <button class="nav-btn" data-view="pautas"><span class="nav-ic-wrap" data-ic="clipboard"></span>Pautas</button>
   <button class="nav-btn" data-view="sobre"><span class="nav-ic-wrap" data-ic="info"></span>Sobre</button>
   <button class="nav-btn" data-view="config" id="navConfig" style="display:none;"><span class="nav-ic-wrap" data-ic="settings"></span>Configurações</button>
   <div class="sidebar-user" id="sidebarUser">
@@ -1594,7 +1641,7 @@
 </div>
 
 <div id="printArea"></div>
-<input type="file" id="fileInputHidden" accept="image/*,application/pdf" multiple style="display:none;">
+<input type="file" id="fileInputHidden" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt" multiple style="display:none;">
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
@@ -1655,6 +1702,7 @@ const ICON_PATHS = {
   printer: '<path d="M6 9V4h12v5"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M6 15h12v6H6z"/>',
   key: '<circle cx="8" cy="15" r="4"/><path d="M11 12 20 3M17 6l2.5 2.5M14.5 8.5 17 11"/>',
   camera: '<path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1-2h7l1 2h2A1.5 1.5 0 0 1 20 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18Z"/><circle cx="12" cy="13" r="3.4"/>',
+  paperclip: '<path d="M7.5 12.5 14.3 5.7a3.6 3.6 0 0 1 5.1 5.1l-8.4 8.4a5.3 5.3 0 0 1-7.5-7.5L12 3.2"/>',
   mapPin: '<path d="M12 21s7-7.8 7-12.5a7 7 0 1 0-14 0C5 13.2 12 21 12 21Z"/><circle cx="12" cy="8.5" r="2.6"/>',
   users2: '<circle cx="8.5" cy="8" r="3.1"/><path d="M2.5 19.5c0-3.3 2.7-5.3 6-5.3s6 2 6 5.3"/>',
   clipboard: '<rect x="6" y="4" width="12" height="17" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6"/>',
@@ -2018,6 +2066,7 @@ let currentView = "checklist";
 let currentTab = "diario";
 let histFilterLoja = "todas";
 let histFilterTipo = "todos";
+let pautasFilterLoja = "todas";
 let collapsedState = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "collapsed") || "{}");
 
 /* Static icon injections */
@@ -2187,8 +2236,8 @@ function renderSection(section, checks){
             <span class="box">${icon("check", 13, 3)}</span>
             <span class="txt">${text}</span>
           </label>
-          <button class="attach-btn ${fileList.length ? "has-files":""}" data-attach-item="${id}" title="Anexar foto/arquivo">
-            ${icon("camera", 15, 2)}${fileList.length ? `<span class="attach-count">${fileList.length}</span>` : ""}
+          <button class="attach-btn ${fileList.length ? "has-files":""}" data-attach-item="${id}" title="Anexar foto ou arquivo (PDF, Word, Excel)">
+            ${icon("paperclip", 15, 2)}${fileList.length ? `<span class="attach-count">${fileList.length}</span>` : ""}
           </button>
         </div>
         ${fileList.length ? `<div class="attach-thumbs" data-thumbs-for="${id}">${fileList.map((f,fi) => `
@@ -2303,7 +2352,7 @@ function renderHistorico(){
           </div>
           ${r.pendentes.length ? `<div class="hist-pendentes"><strong>${r.pendentes.length} pendente(s):</strong> ${r.pendentes.slice(0,3).join(" · ")}${r.pendentes.length>3 ? "…" : ""}</div>` : ""}
           <div class="hist-badges">
-            ${r.anexosCount ? `<span class="hist-badge">${icon("camera",12,2)} ${r.anexosCount}</span>` : ""}
+            ${r.anexosCount ? `<span class="hist-badge">${icon("paperclip",12,2)} ${r.anexosCount}</span>` : ""}
             ${r.ata && r.ata.length ? `<span class="hist-badge">${icon("clipboard",12,2)} Ata</span>` : ""}
             ${r.geo ? `<span class="hist-badge good">${icon("mapPin",12,2)} ${r.geo.distFromLoja}m</span>` : ""}
           </div>
@@ -2324,6 +2373,62 @@ function attachHistFilterHandlers(){
   document.querySelectorAll(".hist-pdf-btn").forEach(btn => {
     btn.addEventListener("click", () => printRecord(btn.getAttribute("data-print-id")));
   });
+}
+
+function renderPautas(){
+  const scoped = isGerente();
+  let recs = getHistorico().filter(r => r.ata && r.ata.length);
+  if (scoped) recs = recs.filter(r => r.loja === session.loja);
+  recs.sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+
+  let html = `<div class="filter-row">
+    <select id="pautasLojaFilter" ${scoped ? "disabled" : ""}>
+      ${scoped ? `<option value="${session.loja}" selected>${session.loja}</option>` : `
+      <option value="todas">Todas as lojas</option>
+      ${LOJAS.map(l => `<option value="${l}" ${pautasFilterLoja===l?"selected":""}>${l}</option>`).join("")}`}
+    </select>
+  </div>`;
+
+  const filtered = recs.filter(r => pautasFilterLoja === "todas" || r.loja === pautasFilterLoja);
+
+  if (!filtered.length){
+    html += emptyState("clipboard", "Nenhuma ata de reunião salva ainda", "<span>As pautas aparecem aqui assim que alguém preenche e salva um checklist com reunião.</span>");
+    document.getElementById("main").innerHTML = html;
+    attachPautasFilterHandlers();
+    return;
+  }
+
+  filtered.forEach(r => {
+    r.ata.forEach(a => {
+      html += `
+        <div class="hist-card pauta-card">
+          <div class="hist-icon">${icon("clipboard", 18, 2)}</div>
+          <div class="hist-body">
+            <div class="hist-top">
+              <div>
+                <span class="hist-tipo">${TIPO_LABEL[r.tipo]}</span>
+                <div class="hist-loja">${a.secao} — ${a.grupo}</div>
+                <div class="hist-meta">${fmtDate(r.date)} às ${fmtHora(r.savedAt)} · ${r.loja} · ${r.auditor}</div>
+              </div>
+            </div>
+            <div class="pauta-detail">
+              <div><strong>Participantes:</strong> ${a.participantes || "—"}</div>
+              <div><strong>Pauta:</strong> ${a.pauta || "—"}</div>
+              <div><strong>Decisões:</strong> ${a.decisoes || "—"}</div>
+              <div><strong>Próximos passos:</strong> ${a.proximosPassos || "—"}</div>
+            </div>
+          </div>
+        </div>`;
+    });
+  });
+
+  document.getElementById("main").innerHTML = html;
+  attachPautasFilterHandlers();
+}
+
+function attachPautasFilterHandlers(){
+  const lf = document.getElementById("pautasLojaFilter");
+  if (lf) lf.addEventListener("change", () => { pautasFilterLoja = lf.value; renderPautas(); });
 }
 
 function printRecord(recordId){
@@ -2762,6 +2867,7 @@ function render(){
   const subnavRow = document.getElementById("subnavRow");
   const progressWrap = document.getElementById("progressWrap");
   const sectorTabsRow = document.getElementById("sectorTabsRow");
+  const geoStatusRow = document.getElementById("geoStatusRow");
 
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === currentView));
 
@@ -2772,6 +2878,7 @@ function render(){
     subnavRow.style.display = "none";
     progressWrap.style.display = "none";
     sectorTabsRow.style.display = "none";
+    geoStatusRow.style.display = "none";
     return;
   }
 
@@ -2781,6 +2888,7 @@ function render(){
     progressWrap.style.display = "none";
     fabSave.style.display = "none";
     sectorTabsRow.style.display = "flex";
+    geoStatusRow.style.display = "none";
     renderSectorTabs();
     renderHistorico();
     return;
@@ -2792,8 +2900,20 @@ function render(){
     progressWrap.style.display = "none";
     fabSave.style.display = "none";
     sectorTabsRow.style.display = "flex";
+    geoStatusRow.style.display = "none";
     renderSectorTabs();
     renderDashboard();
+    return;
+  }
+
+  if (currentView === "pautas"){
+    idRow.style.display = "none";
+    subnavRow.style.display = "none";
+    progressWrap.style.display = "none";
+    fabSave.style.display = "none";
+    sectorTabsRow.style.display = "none";
+    geoStatusRow.style.display = "none";
+    renderPautas();
     return;
   }
 
@@ -2805,6 +2925,7 @@ function render(){
       progressWrap.style.display = "none";
       fabSave.style.display = "none";
       sectorTabsRow.style.display = "none";
+      geoStatusRow.style.display = "none";
       renderConfig();
       return;
     }
@@ -2816,8 +2937,10 @@ function render(){
   progressWrap.style.display = "flex";
   fabSave.style.display = "flex";
   sectorTabsRow.style.display = "flex";
+  geoStatusRow.style.display = "block";
   renderSectorTabs();
   renderPillTabs();
+  updateGeoStatus();
 
   const sections = DATA[currentSector][currentTab];
   const checks = loadChecks(currentTab);
@@ -2835,6 +2958,18 @@ function updateProgress(){
   const sum = summarize(currentTab, checks);
   document.getElementById("progressFill").style.width = sum.pct + "%";
   document.getElementById("progressPct").textContent = `${sum.done}/${sum.total} · ${sum.pct}%`;
+}
+
+function updateGeoStatus(){
+  const wrap = document.getElementById("geoStatusRow");
+  if (!wrap) return;
+  const lojaConf = APP_CONFIG.gerentes.find(g => g.loja === lojaSelect.value);
+  const ativo = lojaConf && lojaConf.lat != null && lojaConf.lng != null;
+  if (ativo){
+    wrap.innerHTML = `<span class="geo-status-chip active">${icon("mapPin",12,2.2)} Geolocalização ativa — raio de ${lojaConf.radius || 150}m da loja</span>`;
+  } else {
+    wrap.innerHTML = `<span class="geo-status-chip inactive">${icon("mapPin",12,2.2)} Sem trava de localização para esta loja</span>`;
+  }
 }
 
 function attachChecklistHandlers(){
