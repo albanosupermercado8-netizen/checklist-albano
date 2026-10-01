@@ -363,16 +363,16 @@
     border-radius:7px;
     border:none;
     background:transparent;
-    color:rgba(255,255,255,.75);
+    color:#F0C878;
     font-size:11.5px;
     font-weight:700;
     font-family:inherit;
     transition:all .18s ease;
   }
   .pill-tabs button.active{
-    background:#fff;
-    color:var(--navy);
-    box-shadow:0 2px 6px rgba(0,0,0,.18);
+    background:linear-gradient(135deg,#FFD37A,var(--gold));
+    color:#3A2600;
+    box-shadow:0 2px 8px rgba(201,138,30,.45);
   }
 
   .progress-wrap{
@@ -2202,9 +2202,11 @@ function renderSection(section, checks){
       const n = notes[gk] || {};
       itemsHtml += `
         <div class="ata-box" data-ata-group="${gk}">
-          <div class="ata-title">${icon("clipboard",14,2)} Ata da Reunião</div>
+          <div class="ata-title">${icon("clipboard",14,2)} Pauta e Ata da Reunião</div>
           <label class="ata-label">Participantes</label>
           <input type="text" class="ata-input" data-ata-field="participantes" data-ata-group="${gk}" value="${(n.participantes||"").replace(/"/g,"&quot;")}" placeholder="Nomes separados por vírgula">
+          <label class="ata-label">Pauta (assuntos a tratar)</label>
+          <textarea class="ata-textarea" data-ata-field="pauta" data-ata-group="${gk}" placeholder="Lista dos assuntos que serão discutidos nessa reunião...">${n.pauta||""}</textarea>
           <label class="ata-label">Decisões tomadas</label>
           <textarea class="ata-textarea" data-ata-field="decisoes" data-ata-group="${gk}" placeholder="O que foi decidido nessa reunião...">${n.decisoes||""}</textarea>
           <label class="ata-label">Próximos passos / Ações</label>
@@ -2339,6 +2341,7 @@ function printRecord(recordId){
     <div style="margin-bottom:14px;padding:12px;border:1px solid #E7E9F0;border-radius:8px;">
       <div style="font-weight:800;font-size:12.5px;margin-bottom:6px;">${a.secao} — ${a.grupo}</div>
       <div style="font-size:12px;margin-bottom:4px;"><strong>Participantes:</strong> ${a.participantes || "—"}</div>
+      <div style="font-size:12px;margin-bottom:4px;"><strong>Pauta:</strong> ${a.pauta || "—"}</div>
       <div style="font-size:12px;margin-bottom:4px;"><strong>Decisões:</strong> ${a.decisoes || "—"}</div>
       <div style="font-size:12px;"><strong>Próximos passos:</strong> ${a.proximosPassos || "—"}</div>
     </div>`).join("") : "";
@@ -2579,6 +2582,28 @@ function renderCfgItemsArea(tipo){
   attachCfgItemHandlers();
 }
 
+function saveAccessFromForm(){
+  const newDiretorPass = document.getElementById("cfgDiretorPass").value.trim();
+  if (newDiretorPass) APP_CONFIG.diretorPassword = newDiretorPass;
+  document.querySelectorAll(".cfg-gerente-card").forEach(card => {
+    const idx = +card.getAttribute("data-idx");
+    const loja = card.querySelector(".cfg-loja-input").value.trim();
+    const pass = card.querySelector(".cfg-pass-input").value.trim();
+    const latStr = card.querySelector(".cfg-lat-input").value.trim();
+    const lngStr = card.querySelector(".cfg-lng-input").value.trim();
+    const radStr = card.querySelector(".cfg-radius-input").value.trim();
+    if (loja) APP_CONFIG.gerentes[idx].loja = loja;
+    if (pass) APP_CONFIG.gerentes[idx].password = pass;
+    APP_CONFIG.gerentes[idx].lat = latStr ? parseFloat(latStr.replace(",",".")) : null;
+    APP_CONFIG.gerentes[idx].lng = lngStr ? parseFloat(lngStr.replace(",",".")) : null;
+    APP_CONFIG.gerentes[idx].radius = radStr ? Math.max(20, parseInt(radStr, 10)) : 150;
+  });
+  saveAppConfig();
+  refreshConfigDerived();
+  rebuildLoginRoleOptions();
+  applyRoleRestrictions();
+}
+
 function attachConfigHandlers(){
   document.getElementById("cfgAddGerente").addEventListener("click", () => {
     APP_CONFIG.gerentes.push({ id: "loja_" + Date.now(), loja: "Nova Loja", password: "123456", lat: null, lng: null, radius: 150 });
@@ -2597,31 +2622,12 @@ function attachConfigHandlers(){
   });
 
   document.getElementById("cfgSaveAccess").addEventListener("click", () => {
-    const newDiretorPass = document.getElementById("cfgDiretorPass").value.trim();
-    if (newDiretorPass) APP_CONFIG.diretorPassword = newDiretorPass;
-    document.querySelectorAll(".cfg-gerente-card").forEach(card => {
-      const idx = +card.getAttribute("data-idx");
-      const loja = card.querySelector(".cfg-loja-input").value.trim();
-      const pass = card.querySelector(".cfg-pass-input").value.trim();
-      const latStr = card.querySelector(".cfg-lat-input").value.trim();
-      const lngStr = card.querySelector(".cfg-lng-input").value.trim();
-      const radStr = card.querySelector(".cfg-radius-input").value.trim();
-      if (loja) APP_CONFIG.gerentes[idx].loja = loja;
-      if (pass) APP_CONFIG.gerentes[idx].password = pass;
-      APP_CONFIG.gerentes[idx].lat = latStr ? parseFloat(latStr.replace(",",".")) : null;
-      APP_CONFIG.gerentes[idx].lng = lngStr ? parseFloat(lngStr.replace(",",".")) : null;
-      APP_CONFIG.gerentes[idx].radius = radStr ? Math.max(20, parseInt(radStr, 10)) : 150;
-    });
-    saveAppConfig();
-    refreshConfigDerived();
-    rebuildLoginRoleOptions();
-    applyRoleRestrictions();
+    saveAccessFromForm();
     showToast("Perfis de acesso atualizados.");
   });
 
   document.querySelectorAll(".cfg-geo-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      const idx = btn.getAttribute("data-idx");
       btn.disabled = true;
       showToast("Obtendo localização atual...");
       navigator.geolocation.getCurrentPosition(
@@ -2629,8 +2635,9 @@ function attachConfigHandlers(){
           const card = btn.closest(".cfg-gerente-card");
           card.querySelector(".cfg-lat-input").value = pos.coords.latitude.toFixed(6);
           card.querySelector(".cfg-lng-input").value = pos.coords.longitude.toFixed(6);
-          btn.disabled = false;
-          showToast("Localização capturada — clique em Salvar para confirmar.");
+          saveAccessFromForm();
+          renderConfig();
+          showToast("Localização dessa loja salva! A trava já está ativa.");
         },
         () => {
           btn.disabled = false;
@@ -2969,8 +2976,8 @@ function collectMeetingNotesForRecord(tab){
       if (!g.meeting) return;
       const gk = groupKey(s.id, gi);
       const n = notes[gk];
-      if (n && (n.participantes || n.decisoes || n.proximosPassos)){
-        out.push({ secao: s.title, grupo: g.sub, participantes: n.participantes || "", decisoes: n.decisoes || "", proximosPassos: n.proximosPassos || "" });
+      if (n && (n.participantes || n.pauta || n.decisoes || n.proximosPassos)){
+        out.push({ secao: s.title, grupo: g.sub, participantes: n.participantes || "", pauta: n.pauta || "", decisoes: n.decisoes || "", proximosPassos: n.proximosPassos || "" });
       }
     });
   });
