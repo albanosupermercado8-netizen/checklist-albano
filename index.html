@@ -665,6 +665,24 @@
   }
   .ata-textarea{ min-height:56px; }
   .ata-input:focus, .ata-textarea:focus{ outline:none; border-color:var(--blue); }
+  .section-note-block{
+    margin:14px 3px 2px;
+    padding-top:12px;
+    border-top:1px dashed var(--border);
+  }
+  .section-note-textarea{
+    width:100%;
+    min-height:50px;
+    padding:9px 11px;
+    border-radius:9px;
+    border:1.5px solid var(--border);
+    background:var(--gray-light);
+    font-size:12.5px;
+    font-family:inherit;
+    color:var(--ink);
+    resize:vertical;
+  }
+  .section-note-textarea:focus{ outline:none; border-color:var(--blue); background:#fff; }
   .box{
     width:22px;
     height:22px;
@@ -2184,6 +2202,15 @@ function saveAttachments(tab, atts){
   localStorage.setItem(key, JSON.stringify(atts));
 }
 
+function loadSectionNotes(tab){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_notes";
+  try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch(e){ return {}; }
+}
+function saveSectionNotes(tab, notes){
+  const key = draftKey(tab, lojaSelect.value, dateInput.value) + "_notes";
+  localStorage.setItem(key, JSON.stringify(notes));
+}
+
 function itemId(sectionId, groupIdx, idx){
   return sectionId + "__g" + groupIdx + "__" + idx;
 }
@@ -2210,6 +2237,7 @@ function summarize(tab, checks){
 function renderSection(section, checks){
   const isCollapsed = !!collapsedState[section.id];
   const atts = loadAttachments(currentTab);
+  const sectionNotes = loadSectionNotes(currentTab);
   let itemsHtml = "";
   section.groups.forEach((g, gi) => {
     if (g.sub) itemsHtml += `<div class="subheader">${g.sub}</div>`;
@@ -2257,6 +2285,10 @@ function renderSection(section, checks){
       </div>
       <div class="section-body ${isCollapsed ? 'hidden' : ''}" id="body_${section.id}">
         ${itemsHtml}
+        <div class="section-note-block">
+          <label class="ata-label">Observações</label>
+          <textarea class="section-note-textarea" data-section-note="${section.id}" placeholder="Alguma observação sobre esta rotina...">${(sectionNotes[section.id]||"")}</textarea>
+        </div>
       </div>
     </div>`;
 }
@@ -2326,6 +2358,7 @@ function renderHistorico(){
           ${r.pendentes.length ? `<div class="hist-pendentes"><strong>${r.pendentes.length} pendente(s):</strong> ${r.pendentes.slice(0,3).join(" · ")}${r.pendentes.length>3 ? "…" : ""}</div>` : ""}
           <div class="hist-badges">
             ${r.anexosCount ? `<span class="hist-badge">${icon("paperclip",12,2)} ${r.anexosCount}</span>` : ""}
+            ${r.observacoes && r.observacoes.length ? `<span class="hist-badge">${icon("clipboard",12,2)} ${r.observacoes.length} obs.</span>` : ""}
             ${r.geo ? `<span class="hist-badge good">${icon("mapPin",12,2)} ${r.geo.distFromLoja}m</span>` : ""}
           </div>
           <button class="hist-pdf-btn" data-print-id="${r.id}">${icon("printer",13,2)} Gerar PDF</button>
@@ -2459,6 +2492,11 @@ function printRecord(recordId){
     </tr>`).join("");
   const geoHtml = r.geo ? `<tr><td style="padding:5px 0;color:#6B7280;">Localização no envio</td><td style="font-weight:700;">${r.geo.distFromLoja}m da loja (dentro do raio permitido)</td></tr>` : "";
   const anexosHtml = r.anexosCount ? `<tr><td style="padding:5px 0;color:#6B7280;">Anexos</td><td style="font-weight:700;">${r.anexosCount} arquivo(s) — ver no app (Histórico)</td></tr>` : "";
+  const observacoesHtml = (r.observacoes && r.observacoes.length) ? r.observacoes.map(o => `
+    <div style="margin-bottom:10px;padding:10px 12px;border:1px solid #E7E9F0;border-radius:8px;">
+      <div style="font-weight:800;font-size:11.5px;color:#0A29B5;margin-bottom:4px;">${o.secao}</div>
+      <div style="font-size:12px;">${o.texto}</div>
+    </div>`).join("") : "";
   document.getElementById("printArea").innerHTML = `
     <div style="font-family:Arial,Helvetica,sans-serif;color:#1B2233;max-width:760px;margin:0 auto;padding:30px;">
       <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #0A29B5;padding-bottom:16px;margin-bottom:20px;">
@@ -2481,6 +2519,7 @@ function printRecord(recordId){
       </table>
       <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Detalhamento por seção</h3>
       <table style="width:100%;border-collapse:collapse;margin-bottom:22px;">${sectionsHtml}</table>
+      ${observacoesHtml ? `<h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Observações</h3>${observacoesHtml}` : ""}
       <h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;">Itens pendentes</h3>
       ${pendentesHtml}
       <p style="margin-top:36px;font-size:10.5px;color:#9AA3B2;">Documento gerado em ${new Date().toLocaleString("pt-BR")} — Falcioni Consultoria</p>
@@ -3025,6 +3064,13 @@ function attachChecklistHandlers(){
     });
   });
 
+  document.querySelectorAll(".section-note-textarea").forEach(ta => {
+    ta.addEventListener("input", () => {
+      const notes = loadSectionNotes(currentTab);
+      notes[ta.getAttribute("data-section-note")] = ta.value;
+      saveSectionNotes(currentTab, notes);
+    });
+  });
 }
 
 document.getElementById("fileInputHidden").addEventListener("change", async (e) => {
@@ -3105,6 +3151,17 @@ function collectAttachmentsForRecord(tab){
   return { count, byItem: atts };
 }
 
+function collectSectionNotesForRecord(tab){
+  const notes = loadSectionNotes(tab);
+  const sections = DATA[currentSector][tab];
+  const out = [];
+  sections.forEach(s => {
+    const texto = (notes[s.id] || "").trim();
+    if (texto) out.push({ secao: s.title, texto });
+  });
+  return out;
+}
+
 document.getElementById("btnSave").addEventListener("click", async () => {
   if (!auditorInput.value.trim()){
     showToast("Informe o nome do auditor antes de salvar");
@@ -3141,6 +3198,7 @@ document.getElementById("btnSave").addEventListener("click", async () => {
   const checks = loadChecks(currentTab);
   const sum = summarize(currentTab, checks);
   const anexos = collectAttachmentsForRecord(currentTab);
+  const observacoes = collectSectionNotesForRecord(currentTab);
   const record = {
     id: Date.now() + "_" + Math.random().toString(36).slice(2,8),
     setor: currentSector,
@@ -3156,6 +3214,7 @@ document.getElementById("btnSave").addEventListener("click", async () => {
     pendentes: sum.pendentes,
     anexosCount: anexos.count,
     anexos: anexos.byItem,
+    observacoes: observacoes,
     geo: geo
   };
   saveHistoricoRecord(record);
