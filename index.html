@@ -3190,11 +3190,13 @@ function updateCounts(){
   });
 }
 
-function showToast(msg){
+let toastTimer = null;
+function showToast(msg, ms = 2200){
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2200);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), ms);
 }
 
 document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -3268,9 +3270,11 @@ document.getElementById("btnSave").addEventListener("click", async () => {
     }
     const dist = haversineDistance(pos.coords.latitude, pos.coords.longitude, lojaConf.lat, lojaConf.lng);
     const radius = lojaConf.radius || 150;
-    if (dist > radius){
+    const accuracy = pos.coords.accuracy || 0;
+    const tolerance = Math.min(accuracy, 200);
+    if (dist - tolerance > radius){
       btnSave.disabled = false;
-      showToast(`Fora da loja (${Math.round(dist)}m de distância, limite ${radius}m) — não é possível salvar daqui.`);
+      showToast(`Fora da loja: ${Math.round(dist)}m de distância (limite ${radius}m, precisão do GPS ±${Math.round(accuracy)}m). Se você está na loja, ligue o GPS/Wi-Fi do aparelho e tente de novo.`, 7000);
       return;
     }
     geo = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy, distFromLoja: Math.round(dist) };
