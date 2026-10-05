@@ -2776,7 +2776,9 @@ function attachConfigHandlers(){
 
   document.getElementById("cfgSaveAccess").addEventListener("click", () => {
     saveAccessFromForm();
-    showToast("Perfis de acesso atualizados.");
+    currentView = "checklist";
+    render();
+    showToast("Salvo! Alterações de acesso e raio de localização atualizados.", 4000);
   });
 
   document.querySelectorAll(".cfg-geo-btn").forEach(btn => {
