@@ -2362,7 +2362,7 @@ function renderHistorico(){
           <div class="hist-badges">
             ${r.anexosCount ? `<span class="hist-badge">${icon("paperclip",12,2)} ${r.anexosCount}</span>` : ""}
             ${r.observacoes && r.observacoes.length ? `<span class="hist-badge">${icon("clipboard",12,2)} ${r.observacoes.length} obs.</span>` : ""}
-            ${r.geo ? `<span class="hist-badge good">${icon("mapPin",12,2)} ${r.geo.distFromLoja}m</span>` : ""}
+            ${r.geo ? (r.geo.semVerificacao ? `<span class="hist-badge">${icon("mapPin",12,2)} Computador (sem verificação)</span>` : `<span class="hist-badge good">${icon("mapPin",12,2)} ${r.geo.distFromLoja}m</span>`) : ""}
           </div>
           <button class="hist-pdf-btn" data-print-id="${r.id}">${icon("printer",13,2)} Gerar PDF</button>
         </div>
@@ -2493,7 +2493,7 @@ function printRecord(recordId){
       <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;">${s.title}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E7E9F0;text-align:right;font-weight:700;">${s.done}/${s.total}</td>
     </tr>`).join("");
-  const geoHtml = r.geo ? `<tr><td style="padding:5px 0;color:#6B7280;">Localização no envio</td><td style="font-weight:700;">${r.geo.distFromLoja}m da loja (dentro do raio permitido)</td></tr>` : "";
+  const geoHtml = r.geo ? `<tr><td style="padding:5px 0;color:#6B7280;">Localização no envio</td><td style="font-weight:700;">${r.geo.semVerificacao ? "Salvo pelo computador (localização não verificada)" : r.geo.distFromLoja + "m da loja (dentro do raio permitido)"}</td></tr>` : "";
   const anexosHtml = r.anexosCount ? `<tr><td style="padding:5px 0;color:#6B7280;">Anexos</td><td style="font-weight:700;">${r.anexosCount} arquivo(s) — ver no app (Histórico)</td></tr>` : "";
   const observacoesHtml = (r.observacoes && r.observacoes.length) ? r.observacoes.map(o => `
     <div style="margin-bottom:10px;padding:10px 12px;border:1px solid #E7E9F0;border-radius:8px;">
@@ -2661,6 +2661,10 @@ function renderConfig(){
     <h3 class="cfg-heading">${icon("key",16,2)}Perfis de Acesso</h3>
     <p class="cfg-hint">Senha do Diretor (acesso master)</p>
     <div class="cfg-row"><input type="text" id="cfgDiretorPass" value="${APP_CONFIG.diretorPassword}"></div>
+    <label class="cfg-hint" style="display:flex;gap:8px;align-items:center;margin:8px 0 14px;">
+      <input type="checkbox" id="cfgAllowDesktop" ${APP_CONFIG.allowDesktop !== false ? "checked" : ""}>
+      Permitir salvar pelo computador sem exigir localização (o histórico registra "Computador")
+    </label>
     <p class="cfg-hint">Lojas e senhas dos gestores</p>
     <div id="cfgGerentesList">
       ${APP_CONFIG.gerentes.map((g,i) => `
@@ -2738,6 +2742,7 @@ function renderCfgItemsArea(tipo){
 function saveAccessFromForm(){
   const newDiretorPass = document.getElementById("cfgDiretorPass").value.trim();
   if (newDiretorPass) APP_CONFIG.diretorPassword = newDiretorPass;
+  APP_CONFIG.allowDesktop = document.getElementById("cfgAllowDesktop").checked;
   document.querySelectorAll(".cfg-gerente-card").forEach(card => {
     const idx = +card.getAttribute("data-idx");
     const loja = card.querySelector(".cfg-loja-input").value.trim();
@@ -3010,12 +3015,24 @@ function updateProgress(){
   document.getElementById("progressPct").textContent = `${sum.done}/${sum.total} · ${sum.pct}%`;
 }
 
+function isComputerDevice(){
+  const ua = navigator.userAgent || "";
+  if (/Android|iPhone|iPad|iPod|Mobi/i.test(ua)) return false;
+  if (navigator.userAgentData && navigator.userAgentData.mobile) return false;
+  return true;
+}
+function geoLiberadoNoComputador(){
+  return isComputerDevice() && APP_CONFIG.allowDesktop !== false;
+}
+
 function updateGeoStatus(){
   const wrap = document.getElementById("geoStatusRow");
   if (!wrap) return;
   const lojaConf = APP_CONFIG.gerentes.find(g => g.loja === lojaSelect.value);
   const ativo = lojaConf && lojaConf.lat != null && lojaConf.lng != null;
-  if (ativo){
+  if (ativo && geoLiberadoNoComputador()){
+    wrap.innerHTML = `<span class="geo-status-chip inactive">${icon("mapPin",12,2.2)} Computador: localização não é exigida (fica registrado)</span>`;
+  } else if (ativo){
     wrap.innerHTML = `<span class="geo-status-chip active">${icon("mapPin",12,2.2)} Geolocalização ativa — raio de ${lojaConf.radius || 150}m da loja</span>`;
   } else {
     wrap.innerHTML = `<span class="geo-status-chip inactive">${icon("mapPin",12,2.2)} Sem trava de localização para esta loja</span>`;
@@ -3260,7 +3277,9 @@ document.getElementById("btnSave").addEventListener("click", async () => {
   const lojaConf = APP_CONFIG.gerentes.find(g => g.loja === lojaSelect.value);
   let geo = null;
 
-  if (lojaConf && lojaConf.lat != null && lojaConf.lng != null){
+  if (lojaConf && lojaConf.lat != null && lojaConf.lng != null && geoLiberadoNoComputador()){
+    geo = { semVerificacao: true, dispositivo: "computador" };
+  } else if (lojaConf && lojaConf.lat != null && lojaConf.lng != null){
     btnSave.disabled = true;
     showToast("Verificando localização...");
     let pos;
