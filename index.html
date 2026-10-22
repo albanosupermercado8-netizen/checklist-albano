@@ -1791,6 +1791,7 @@ function ensureGerenteExtras(){
   });
   if (!Array.isArray(APP_CONFIG.lideres)) { APP_CONFIG.lideres = []; changed = true; }
   if (typeof APP_CONFIG.prazoAtaHoras !== "number") { APP_CONFIG.prazoAtaHoras = 24; changed = true; }
+  if (!APP_CONFIG.supervisoraPassword) { APP_CONFIG.supervisoraPassword = "gerlandia2026"; changed = true; }
   return changed;
 }
 
@@ -1837,7 +1838,8 @@ function initAppConfigSync(){
 function buildRoles(){
   return [
     ...APP_CONFIG.gerentes.map(g => ({ id: g.id, role: "gerente", loja: g.loja, password: g.password, label: "Gestor — " + g.loja })),
-    { id: "diretor", role: "diretor", loja: null, password: APP_CONFIG.diretorPassword, label: "Diretor" }
+    { id: "diretor", role: "diretor", loja: null, password: APP_CONFIG.diretorPassword, label: "Diretor" },
+    { id: "gerlandia", role: "diretor", loja: null, password: APP_CONFIG.supervisoraPassword, label: "Supervisora — Gerlândia" }
   ];
 }
 function refreshConfigDerived(){
@@ -3111,6 +3113,8 @@ function renderConfig(){
     <h3 class="cfg-heading">${icon("key",16,2)}Perfis de Acesso</h3>
     <p class="cfg-hint">Senha do Diretor (acesso master)</p>
     <div class="cfg-row"><input type="text" id="cfgDiretorPass" value="${APP_CONFIG.diretorPassword}"></div>
+    <p class="cfg-hint">Senha da Supervisora Gerlândia (mesmos poderes do Diretor)</p>
+    <div class="cfg-row"><input type="text" id="cfgSupervisoraPass" value="${APP_CONFIG.supervisoraPassword}"></div>
     <label class="cfg-hint" style="display:flex;gap:8px;align-items:center;margin:8px 0 14px;">
       <input type="checkbox" id="cfgAllowDesktop" ${APP_CONFIG.allowDesktop !== false ? "checked" : ""}>
       Permitir salvar pelo computador sem exigir localização (o histórico registra "Computador")
@@ -3220,6 +3224,8 @@ function renderCfgItemsArea(tipo){
 function saveAccessFromForm(){
   const newDiretorPass = document.getElementById("cfgDiretorPass").value.trim();
   if (newDiretorPass) APP_CONFIG.diretorPassword = newDiretorPass;
+  const newSupPass = document.getElementById("cfgSupervisoraPass").value.trim();
+  if (newSupPass) APP_CONFIG.supervisoraPassword = newSupPass;
   APP_CONFIG.allowDesktop = document.getElementById("cfgAllowDesktop").checked;
   document.querySelectorAll(".cfg-gerente-card").forEach(card => {
     const idx = +card.getAttribute("data-idx");
@@ -3885,8 +3891,9 @@ function isGerente(){ return session && session.role === "gerente"; }
 
 function applyRoleRestrictions(){
   if (!session) return;
-  const displayName = isGerente() ? session.loja : "Diretor";
-  const displayRole = isGerente() ? "Gestor de loja" : "Acesso master";
+  const ehSupervisora = session.id === "gerlandia";
+  const displayName = isGerente() ? session.loja : (ehSupervisora ? "Gerlândia" : "Diretor");
+  const displayRole = isGerente() ? "Gestor de loja" : (ehSupervisora ? "Supervisora" : "Acesso master");
   document.getElementById("ucLabelText").textContent = displayName;
   document.getElementById("ucRoleText").textContent = displayRole;
   document.getElementById("suName").textContent = displayName;
