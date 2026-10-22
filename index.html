@@ -665,6 +665,40 @@
   }
   .ata-textarea{ min-height:56px; }
   .ata-input:focus, .ata-textarea:focus{ outline:none; border-color:var(--blue); }
+  .reu-tabs{ margin-bottom:14px; }
+  .reu-acao-row{ display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed var(--border); }
+  .reu-acao-del{ justify-self:end; }
+  .reu-acoes-list{ margin:4px 0 0; padding-left:18px; }
+  .reu-alert{
+    display:flex; gap:10px; align-items:flex-start;
+    background:#FDECEC; color:#9B1C1C; border:1px solid #F5C2C2;
+    border-radius:var(--radius-md); padding:12px 14px; margin-bottom:14px; font-size:12.5px; line-height:1.5;
+  }
+  .reu-alert svg{ flex:none; margin-top:2px; }
+  .reu-lider-card{
+    background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:16px; margin-bottom:14px; box-shadow:var(--shadow-md);
+  }
+  .reu-lider-nome{ font-size:15px; font-weight:800; color:var(--navy); }
+  .reu-occ-list{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  .reu-occ{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:7px 10px; border-radius:8px; font-size:12px; font-weight:600;
+    background:var(--gray-light); color:var(--gray);
+  }
+  .reu-occ span:first-child{ font-weight:800; }
+  .reu-occ.reu-prazo{ background:var(--green-light); color:var(--green); }
+  .reu-occ.reu-atrasada, .hist-badge.reu-warn{ background:#FFF3D6; color:#9A6700; }
+  .reu-occ.reu-faltando, .hist-badge.reu-bad{ background:#FDECEC; color:#9B1C1C; }
+  .reu-fb-btn{
+    margin-left:auto; border:none; cursor:pointer; font-family:inherit;
+    background:var(--blue); color:#fff; font-size:11px; font-weight:700;
+    padding:5px 10px; border-radius:20px;
+  }
+  .cfg-lider-card{ background:var(--gray-light); border-radius:var(--radius-md); padding:10px; margin-bottom:10px; display:grid; gap:6px; }
+  @media (min-width:860px){
+    .reu-acao-row{ grid-template-columns:2fr 1fr 150px 34px; align-items:center; }
+  }
   .section-note-block{
     margin:14px 3px 2px;
     padding-top:12px;
@@ -1223,7 +1257,12 @@
     margin-top:6px;
     font-weight:500;
   }
-  .cfg-del-btn, .cfg-item-del{
+  .cfg-lider-card input, .cfg-lider-card select, #cfgPrazoAta{
+    width:100%; padding:10px 12px; border-radius:9px; border:1px solid #C7D2E0;
+    background:#fff; font-size:13px; font-family:inherit; color:var(--ink);
+  }
+  .cfg-lider-card .cfg-gerente-row input{ flex:1; }
+  .cfg-del-btn, .cfg-item-del, .cfg-lider-del{
     display:flex;
     align-items:center;
     justify-content:center;
@@ -1644,7 +1683,7 @@
   <button class="nav-btn active" data-view="checklist"><span class="nav-ic-wrap" data-ic="checklist"></span>Checklist</button>
   <button class="nav-btn" data-view="historico"><span class="nav-ic-wrap" data-ic="history"></span>Histórico</button>
   <button class="nav-btn" data-view="dashboard"><span class="nav-ic-wrap" data-ic="dashboard"></span>Dashboard</button>
-  <button class="nav-btn" data-view="pautas"><span class="nav-ic-wrap" data-ic="clipboard"></span>Pautas</button>
+  <button class="nav-btn" data-view="pautas"><span class="nav-ic-wrap" data-ic="clipboard"></span>Reuniões</button>
   <button class="nav-btn" data-view="sobre"><span class="nav-ic-wrap" data-ic="info"></span>Sobre</button>
   <button class="nav-btn" data-view="config" id="navConfig" style="display:none;"><span class="nav-ic-wrap" data-ic="settings"></span>Configurações</button>
   <div class="sidebar-user" id="sidebarUser">
@@ -1750,6 +1789,8 @@ function ensureGerenteExtras(){
     if (!("lng" in g)) { g.lng = null; changed = true; }
     if (!("radius" in g)) { g.radius = 150; changed = true; }
   });
+  if (!Array.isArray(APP_CONFIG.lideres)) { APP_CONFIG.lideres = []; changed = true; }
+  if (typeof APP_CONFIG.prazoAtaHoras !== "number") { APP_CONFIG.prazoAtaHoras = 24; changed = true; }
   return changed;
 }
 
@@ -2170,6 +2211,26 @@ function savePautaRecord(record){
   }
 }
 
+let feedbacksCache = [];
+try { feedbacksCache = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "feedbacks") || "[]"); } catch(e){ feedbacksCache = []; }
+
+function saveFeedbackRecord(record){
+  feedbacksCache.push(record);
+  localStorage.setItem(STORAGE_PREFIX + "feedbacks", JSON.stringify(feedbacksCache));
+  if (firebaseReady){
+    db.collection("feedbacks").doc(record.id).set(record).catch(e => console.error("Erro ao salvar feedback no Firebase:", e));
+  }
+}
+
+function setupFeedbacksSync(){
+  if (!firebaseReady) return;
+  db.collection("feedbacks").onSnapshot(snap => {
+    feedbacksCache = snap.docs.map(d => d.data());
+    localStorage.setItem(STORAGE_PREFIX + "feedbacks", JSON.stringify(feedbacksCache));
+    if (currentView === "pautas") render();
+  }, err => console.error("Erro ao sincronizar feedbacks:", err));
+}
+
 function setupPautasSync(){
   if (!firebaseReady) return;
   db.collection("pautas").onSnapshot(snap => {
@@ -2383,103 +2444,492 @@ function attachHistFilterHandlers(){
   });
 }
 
-function renderPautas(){
-  const scoped = isGerente();
+/* ---------- Reuniões: atas, feedbacks e acompanhamento ---------- */
+let reuniaoTab = "atas";
+let reuniaoPrefill = null;
+const DIAS_SEMANA = ["domingo","segunda-feira","terça-feira","quarta-feira","quinta-feira","sexta-feira","sábado"];
+const TIPO_ATA_LABEL = { semanal: "Semanal", mensal: "Mensal", extra: "Extraordinária" };
 
-  let html = `<div class="pauta-form">
-    <div class="pauta-form-title">${icon("clipboard",16,2)} Nova Pauta de Reunião</div>
+function escHtml(s){
+  return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function ymd(d){
+  const p = n => String(n).padStart(2,"0");
+  return d.getFullYear() + "-" + p(d.getMonth()+1) + "-" + p(d.getDate());
+}
+function lideresVisiveis(){
+  const l = APP_CONFIG.lideres || [];
+  return isGerente() ? l.filter(x => x.loja === session.loja) : l;
+}
+function lojasVisiveis(){
+  return isGerente() ? [session.loja] : LOJAS;
+}
+function descAgendaLider(l){
+  const hora = l.hora ? " às " + l.hora : "";
+  return l.frequencia === "mensal" ? `Mensal, dia ${l.dia}${hora}` : `Semanal, ${DIAS_SEMANA[l.dia] || "—"}${hora}`;
+}
+function ocorrenciasLider(l){
+  const now = new Date();
+  const [hh, mm] = (l.hora || "00:00").split(":").map(n => parseInt(n,10) || 0);
+  const out = [];
+  for (let i = 0; i < 35; i++){
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i, hh, mm);
+    const bate = l.frequencia === "mensal" ? d.getDate() === Math.min(+l.dia || 1, 28) : d.getDay() === +l.dia;
+    if (bate && d <= now) out.push(d);
+  }
+  return out.sort((a,b) => a - b);
+}
+function statusAtasLider(l){
+  const prazoMs = (APP_CONFIG.prazoAtaHoras || 24) * 3600000;
+  const dia = 86400000;
+  const atas = getPautas().filter(r => r.liderId === l.id && r.tipo === l.frequencia);
+  const usadas = new Set();
+  return ocorrenciasLider(l).map(d => {
+    const dStr = ymd(d);
+    const ata = atas.find(a => !usadas.has(a.id) && a.dataReuniao &&
+      Math.abs(new Date(a.dataReuniao + "T12:00:00") - new Date(dStr + "T12:00:00")) <= 2 * dia);
+    if (ata){
+      usadas.add(ata.id);
+      const noPrazo = new Date(ata.savedAt) <= new Date(d.getTime() + prazoMs);
+      return { data: d, dStr, ata, status: noPrazo ? "prazo" : "atrasada" };
+    }
+    return { data: d, dStr, ata: null, status: Date.now() > d.getTime() + prazoMs ? "faltando" : "aguardando" };
+  });
+}
+const STATUS_ATA_LABEL = { prazo: "No prazo", atrasada: "Lançada com atraso", faltando: "Não lançada", aguardando: "Aguardando" };
+
+function renderReunioes(){
+  const tabs = [["atas","Atas de reunião"],["feedbacks","Feedbacks"],["acomp","Acompanhamento"]];
+  let html = `<div class="cfg-tipo-tabs reu-tabs">${tabs.map(([k,l]) =>
+    `<button class="cfg-tipo-btn ${reuniaoTab === k ? "active" : ""}" data-reutab="${k}">${l}</button>`).join("")}</div>`;
+  html += reuniaoTab === "atas" ? htmlAtas() : reuniaoTab === "feedbacks" ? htmlFeedbacks() : htmlAcompanhamento();
+  document.getElementById("main").innerHTML = html;
+
+  document.querySelectorAll("[data-reutab]").forEach(b => b.addEventListener("click", () => {
+    reuniaoTab = b.getAttribute("data-reutab");
+    renderReunioes();
+  }));
+  const lf = document.getElementById("pautasLojaFilter");
+  if (lf) lf.addEventListener("change", () => { pautasFilterLoja = lf.value; renderReunioes(); });
+
+  if (reuniaoTab === "atas") attachAtasHandlers();
+  else if (reuniaoTab === "feedbacks") attachFeedbacksHandlers();
+  else attachAcompanhamentoHandlers();
+}
+
+function htmlFiltroLoja(){
+  const scoped = isGerente();
+  return `<div class="filter-row">
+    <select id="pautasLojaFilter" ${scoped ? "disabled" : ""}>
+      ${scoped ? `<option value="${escHtml(session.loja)}" selected>${escHtml(session.loja)}</option>` : `
+      <option value="todas">Todas as lojas</option>
+      ${LOJAS.map(l => `<option value="${escHtml(l)}" ${pautasFilterLoja === l ? "selected" : ""}>${escHtml(l)}</option>`).join("")}`}
+    </select>
+  </div>`;
+}
+
+function acaoRowHtml(a){
+  a = a || {};
+  return `<div class="reu-acao-row">
+    <input type="text" class="ata-input reu-acao-txt" placeholder="Ação" value="${escHtml(a.acao)}">
+    <input type="text" class="ata-input reu-acao-resp" placeholder="Responsável" value="${escHtml(a.responsavel)}">
+    <input type="date" class="ata-input reu-acao-prazo" value="${escHtml(a.prazo)}">
+    <button type="button" class="cfg-item-del reu-acao-del" title="Remover">${icon("trash",13,2)}</button>
+  </div>`;
+}
+
+function htmlAtas(){
+  const scoped = isGerente();
+  const hoje = todayStr();
+  const pendentes = [];
+  lideresVisiveis().forEach(l => statusAtasLider(l).filter(s => s.status === "faltando")
+    .forEach(s => pendentes.push({ l, s })));
+
+  let html = "";
+  if (pendentes.length){
+    html += `<div class="reu-alert">${icon("alert",15,2.2)}<div><strong>Atas não lançadas no prazo</strong>
+      ${pendentes.slice(-6).map(p => `<div>${escHtml(p.l.nome)} (${escHtml(p.l.loja)}) — reunião de ${fmtDate(p.s.dStr)}</div>`).join("")}</div></div>`;
+  }
+
+  html += `<div class="pauta-form">
+    <div class="pauta-form-title">${icon("clipboard",16,2)} Nova Ata de Reunião</div>
     <label class="ata-label">Loja</label>
     ${scoped
-      ? `<input type="text" class="ata-input" id="pautaLojaField" value="${session.loja}" disabled>`
-      : `<select class="ata-input" id="pautaLojaField">${LOJAS.map(l => `<option value="${l}">${l}</option>`).join("")}</select>`}
-    <label class="ata-label">Responsável</label>
-    <input type="text" class="ata-input" id="pautaResponsavel" placeholder="Seu nome" value="${(auditorInput.value || "").replace(/"/g,"&quot;")}">
+      ? `<input type="text" class="ata-input" id="ataLoja" value="${escHtml(session.loja)}" disabled>`
+      : `<select class="ata-input" id="ataLoja">${LOJAS.map(l => `<option value="${escHtml(l)}">${escHtml(l)}</option>`).join("")}</select>`}
+    <label class="ata-label">Líder da reunião</label>
+    <select class="ata-input" id="ataLider"></select>
+    <input type="text" class="ata-input" id="ataLiderOutro" placeholder="Nome do líder" style="display:none;margin-top:6px;">
+    <label class="ata-label">Tipo</label>
+    <select class="ata-input" id="ataTipo">
+      <option value="semanal">Semanal</option>
+      <option value="mensal">Mensal</option>
+      <option value="extra">Extraordinária</option>
+    </select>
+    <label class="ata-label">Data da reunião</label>
+    <input type="date" class="ata-input" id="ataData" value="${hoje}" max="${hoje}">
+    <label class="ata-label">Quem está registrando</label>
+    <input type="text" class="ata-input" id="ataResponsavel" placeholder="Seu nome" value="${escHtml(auditorInput.value || "")}">
     <label class="ata-label">Participantes</label>
-    <input type="text" class="ata-input" id="pautaParticipantes" placeholder="Nomes separados por vírgula">
-    <label class="ata-label">Assunto</label>
-    <textarea class="ata-textarea" id="pautaAssunto" placeholder="Sobre o que foi essa reunião..."></textarea>
+    <input type="text" class="ata-input" id="ataParticipantes" placeholder="Nomes separados por vírgula">
+    <label class="ata-label">Pauta / temas tratados</label>
+    <textarea class="ata-textarea" id="ataAssunto" placeholder="Quais temas foram levados para a reunião..."></textarea>
     <label class="ata-label">Decisões tomadas</label>
-    <textarea class="ata-textarea" id="pautaDecisoes" placeholder="O que foi decidido..."></textarea>
-    <label class="ata-label">Próximos passos / Ações</label>
-    <textarea class="ata-textarea" id="pautaProximosPassos" placeholder="O que precisa ser feito até a próxima reunião..."></textarea>
-    <button class="cfg-save-btn" id="btnSavePauta">${icon("check",15,2.6)} Salvar Pauta</button>
+    <textarea class="ata-textarea" id="ataDecisoes" placeholder="O que foi decidido..."></textarea>
+    <label class="ata-label">Pontos de ação</label>
+    <div id="ataAcoes">${acaoRowHtml()}${acaoRowHtml()}</div>
+    <button type="button" class="cfg-add-btn" id="ataAddAcao">${icon("plus",14,2.4)} Adicionar ação</button>
+    <button class="cfg-save-btn" id="btnSaveAta">${icon("check",15,2.6)} Salvar Ata</button>
   </div>`;
 
   let recs = getPautas().slice();
   if (scoped) recs = recs.filter(r => r.loja === session.loja);
+  recs = recs.filter(r => pautasFilterLoja === "todas" || r.loja === pautasFilterLoja);
   recs.sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
 
-  html += `<div class="filter-row">
-    <select id="pautasLojaFilter" ${scoped ? "disabled" : ""}>
-      ${scoped ? `<option value="${session.loja}" selected>${session.loja}</option>` : `
-      <option value="todas">Todas as lojas</option>
-      ${LOJAS.map(l => `<option value="${l}" ${pautasFilterLoja===l?"selected":""}>${l}</option>`).join("")}`}
-    </select>
-  </div>`;
-
-  const filtered = recs.filter(r => pautasFilterLoja === "todas" || r.loja === pautasFilterLoja);
-
-  if (!filtered.length){
-    html += emptyState("clipboard", "Nenhuma pauta salva ainda", "<span>Preencha o formulário acima e clique em \"Salvar Pauta\".</span>");
+  html += htmlFiltroLoja();
+  if (!recs.length){
+    html += emptyState("clipboard", "Nenhuma ata salva ainda", "<span>Preencha o formulário acima e clique em \"Salvar Ata\".</span>");
   } else {
-    filtered.forEach(r => {
+    recs.forEach(r => {
+      const acoes = (r.acoes || []).filter(a => a.acao);
       html += `
         <div class="hist-card pauta-card">
           <div class="hist-icon">${icon("clipboard", 18, 2)}</div>
           <div class="hist-body">
-            <div class="hist-top">
-              <div>
-                <div class="hist-loja">${r.loja}</div>
-                <div class="hist-meta">${fmtDate(r.date)} às ${fmtHora(r.savedAt)} · ${r.auditor}</div>
-              </div>
-            </div>
+            <div class="hist-top"><div>
+              <div class="hist-loja">${escHtml(r.loja)}${r.tipo ? ` · ${TIPO_ATA_LABEL[r.tipo] || ""}` : ""}</div>
+              <div class="hist-meta">${r.liderNome ? `Líder: ${escHtml(r.liderNome)} · ` : ""}Reunião de ${fmtDate(r.dataReuniao || r.date)} · lançada em ${fmtDate(r.date)} às ${fmtHora(r.savedAt)} por ${escHtml(r.auditor)}</div>
+            </div></div>
             <div class="pauta-detail">
-              <div><strong>Participantes:</strong> ${r.participantes || "—"}</div>
-              <div><strong>Assunto:</strong> ${r.assunto || "—"}</div>
-              <div><strong>Decisões:</strong> ${r.decisoes || "—"}</div>
-              <div><strong>Próximos passos:</strong> ${r.proximosPassos || "—"}</div>
+              <div><strong>Participantes:</strong> ${escHtml(r.participantes) || "—"}</div>
+              <div><strong>Pauta / temas:</strong> ${escHtml(r.assunto) || "—"}</div>
+              <div><strong>Decisões:</strong> ${escHtml(r.decisoes) || "—"}</div>
+              ${acoes.length ? `<div><strong>Pontos de ação:</strong><ul class="reu-acoes-list">${acoes.map(a =>
+                `<li>${escHtml(a.acao)}${a.responsavel ? ` — <em>${escHtml(a.responsavel)}</em>` : ""}${a.prazo ? ` (até ${fmtDate(a.prazo)})` : ""}</li>`).join("")}</ul></div>`
+                : (r.proximosPassos ? `<div><strong>Próximos passos:</strong> ${escHtml(r.proximosPassos)}</div>` : "")}
             </div>
+            <button class="hist-pdf-btn" data-ata-pdf="${r.id}">${icon("printer",13,2)} PDF para assinatura</button>
           </div>
         </div>`;
     });
   }
-
-  document.getElementById("main").innerHTML = html;
-  attachPautasFilterHandlers();
+  return html;
 }
 
-function attachPautasFilterHandlers(){
-  const lf = document.getElementById("pautasLojaFilter");
-  if (lf) lf.addEventListener("change", () => { pautasFilterLoja = lf.value; renderPautas(); });
+function attachAtasHandlers(){
+  const lojaEl = document.getElementById("ataLoja");
+  const liderEl = document.getElementById("ataLider");
+  const outroEl = document.getElementById("ataLiderOutro");
 
-  document.getElementById("btnSavePauta").addEventListener("click", () => {
-    const loja = document.getElementById("pautaLojaField").value;
-    const responsavel = document.getElementById("pautaResponsavel").value.trim();
-    const participantes = document.getElementById("pautaParticipantes").value.trim();
-    const assunto = document.getElementById("pautaAssunto").value.trim();
-    const decisoes = document.getElementById("pautaDecisoes").value.trim();
-    const proximosPassos = document.getElementById("pautaProximosPassos").value.trim();
+  function fillLideres(){
+    const doLoja = (APP_CONFIG.lideres || []).filter(l => l.loja === lojaEl.value);
+    liderEl.innerHTML = doLoja.map(l => `<option value="${escHtml(l.id)}">${escHtml(l.nome)}</option>`).join("") +
+      `<option value="">Outro / não cadastrado</option>`;
+    toggleOutro();
+    syncTipo();
+  }
+  function toggleOutro(){ outroEl.style.display = liderEl.value === "" ? "block" : "none"; }
+  function syncTipo(){
+    const l = (APP_CONFIG.lideres || []).find(x => x.id === liderEl.value);
+    if (l) document.getElementById("ataTipo").value = l.frequencia;
+  }
+  lojaEl.addEventListener("change", fillLideres);
+  liderEl.addEventListener("change", () => { toggleOutro(); syncTipo(); });
+  fillLideres();
 
-    if (!responsavel){
-      showToast("Informe o nome do responsável antes de salvar.");
+  document.getElementById("ataAddAcao").addEventListener("click", () => {
+    document.getElementById("ataAcoes").insertAdjacentHTML("beforeend", acaoRowHtml());
+  });
+  document.getElementById("ataAcoes").addEventListener("click", (e) => {
+    const btn = e.target.closest(".reu-acao-del");
+    if (btn) btn.closest(".reu-acao-row").remove();
+  });
+
+  document.querySelectorAll("[data-ata-pdf]").forEach(b =>
+    b.addEventListener("click", () => printAta(b.getAttribute("data-ata-pdf"))));
+
+  document.getElementById("btnSaveAta").addEventListener("click", () => {
+    const loja = lojaEl.value;
+    const lider = (APP_CONFIG.lideres || []).find(l => l.id === liderEl.value);
+    const liderNome = lider ? lider.nome : outroEl.value.trim();
+    const responsavel = document.getElementById("ataResponsavel").value.trim();
+    const dataReuniao = document.getElementById("ataData").value;
+    const participantes = document.getElementById("ataParticipantes").value.trim();
+    const assunto = document.getElementById("ataAssunto").value.trim();
+    const decisoes = document.getElementById("ataDecisoes").value.trim();
+    const acoes = Array.from(document.querySelectorAll("#ataAcoes .reu-acao-row")).map(row => ({
+      acao: row.querySelector(".reu-acao-txt").value.trim(),
+      responsavel: row.querySelector(".reu-acao-resp").value.trim(),
+      prazo: row.querySelector(".reu-acao-prazo").value
+    })).filter(a => a.acao);
+
+    if (!liderNome){ showToast("Informe o líder da reunião."); return; }
+    if (!responsavel){ showToast("Informe quem está registrando a ata."); return; }
+    if (!dataReuniao || dataReuniao > todayStr()){ showToast("Informe a data em que a reunião aconteceu."); return; }
+    if (!assunto && !decisoes && !participantes && !acoes.length){
+      showToast("Preencha ao menos participantes, pauta, decisões ou ações.");
       return;
     }
-    if (!assunto && !decisoes && !participantes){
-      showToast("Preencha ao menos participantes, assunto ou decisões.");
-      return;
-    }
 
-    const record = {
+    savePautaRecord({
       id: Date.now() + "_" + Math.random().toString(36).slice(2,8),
-      loja, auditor: responsavel, participantes, assunto, decisoes, proximosPassos,
+      loja, auditor: responsavel,
+      liderId: lider ? lider.id : null, liderNome,
+      tipo: document.getElementById("ataTipo").value,
+      dataReuniao, participantes, assunto, decisoes, acoes,
       date: todayStr(),
       savedAt: new Date().toISOString()
-    };
-    savePautaRecord(record);
+    });
     localStorage.setItem(STORAGE_PREFIX + "last_auditor", responsavel);
-    showToast("Pauta salva!");
-    renderPautas();
+    showToast("Ata salva!");
+    renderReunioes();
   });
+}
+
+function htmlFeedbacks(){
+  const scoped = isGerente();
+  const hoje = todayStr();
+  const pf = reuniaoPrefill || {};
+  reuniaoPrefill = null;
+  const lojaInicial = pf.loja || (scoped ? session.loja : LOJAS[0]);
+
+  let html = `<div class="pauta-form">
+    <div class="pauta-form-title">${icon("user",16,2)} Novo Feedback</div>
+    <label class="ata-label">Loja</label>
+    ${scoped
+      ? `<input type="text" class="ata-input" id="fbLoja" value="${escHtml(session.loja)}" disabled>`
+      : `<select class="ata-input" id="fbLoja">${LOJAS.map(l => `<option value="${escHtml(l)}" ${l === lojaInicial ? "selected" : ""}>${escHtml(l)}</option>`).join("")}</select>`}
+    <label class="ata-label">Quem aplica o feedback</label>
+    <input type="text" class="ata-input" id="fbAplicador" placeholder="Seu nome" value="${escHtml(auditorInput.value || "")}">
+    <label class="ata-label">Colaborador / líder que recebe</label>
+    <input type="text" class="ata-input" id="fbColaborador" list="fbListaLideres" placeholder="Nome" value="${escHtml(pf.colaborador)}">
+    <datalist id="fbListaLideres">${(APP_CONFIG.lideres || []).map(l => `<option value="${escHtml(l.nome)}">`).join("")}</datalist>
+    <label class="ata-label">Data do feedback</label>
+    <input type="date" class="ata-input" id="fbData" value="${hoje}" max="${hoje}">
+    <label class="ata-label">Pontos fortes</label>
+    <textarea class="ata-textarea" id="fbFortes" placeholder="O que a pessoa faz bem..."></textarea>
+    <label class="ata-label">Pontos a melhorar</label>
+    <textarea class="ata-textarea" id="fbMelhorar" placeholder="O que precisa evoluir...">${escHtml(pf.melhorar)}</textarea>
+    <label class="ata-label">Plano de ação / combinados</label>
+    <textarea class="ata-textarea" id="fbPlano" placeholder="O que ficou combinado a partir de agora..."></textarea>
+    <label class="ata-label">Prazo para acompanhamento (opcional)</label>
+    <input type="date" class="ata-input" id="fbPrazo">
+    <button class="cfg-save-btn" id="btnSaveFb">${icon("check",15,2.6)} Salvar Feedback</button>
+  </div>`;
+
+  let recs = feedbacksCache.slice();
+  if (scoped) recs = recs.filter(r => r.loja === session.loja);
+  recs = recs.filter(r => pautasFilterLoja === "todas" || r.loja === pautasFilterLoja);
+  recs.sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+
+  html += htmlFiltroLoja();
+  if (!recs.length){
+    html += emptyState("user", "Nenhum feedback salvo ainda", "<span>Preencha o formulário acima e clique em \"Salvar Feedback\".</span>");
+  } else {
+    recs.forEach(r => {
+      html += `
+        <div class="hist-card pauta-card">
+          <div class="hist-icon">${icon("user", 18, 2)}</div>
+          <div class="hist-body">
+            <div class="hist-top"><div>
+              <div class="hist-loja">${escHtml(r.colaborador)} · ${escHtml(r.loja)}</div>
+              <div class="hist-meta">Feedback de ${fmtDate(r.dataFeedback || r.date)} · aplicado por ${escHtml(r.aplicador)}</div>
+            </div></div>
+            <div class="pauta-detail">
+              <div><strong>Pontos fortes:</strong> ${escHtml(r.fortes) || "—"}</div>
+              <div><strong>Pontos a melhorar:</strong> ${escHtml(r.melhorar) || "—"}</div>
+              <div><strong>Plano de ação:</strong> ${escHtml(r.plano) || "—"}</div>
+              ${r.prazoAcomp ? `<div><strong>Acompanhar até:</strong> ${fmtDate(r.prazoAcomp)}</div>` : ""}
+            </div>
+            <button class="hist-pdf-btn" data-fb-pdf="${r.id}">${icon("printer",13,2)} PDF para assinatura</button>
+          </div>
+        </div>`;
+    });
+  }
+  return html;
+}
+
+function attachFeedbacksHandlers(){
+  document.querySelectorAll("[data-fb-pdf]").forEach(b =>
+    b.addEventListener("click", () => printFeedback(b.getAttribute("data-fb-pdf"))));
+
+  document.getElementById("btnSaveFb").addEventListener("click", () => {
+    const loja = document.getElementById("fbLoja").value;
+    const aplicador = document.getElementById("fbAplicador").value.trim();
+    const colaborador = document.getElementById("fbColaborador").value.trim();
+    const dataFeedback = document.getElementById("fbData").value;
+    const fortes = document.getElementById("fbFortes").value.trim();
+    const melhorar = document.getElementById("fbMelhorar").value.trim();
+    const plano = document.getElementById("fbPlano").value.trim();
+    const prazoAcomp = document.getElementById("fbPrazo").value;
+
+    if (!aplicador){ showToast("Informe quem está aplicando o feedback."); return; }
+    if (!colaborador){ showToast("Informe quem está recebendo o feedback."); return; }
+    if (!dataFeedback || dataFeedback > todayStr()){ showToast("Informe a data em que o feedback aconteceu."); return; }
+    if (!fortes && !melhorar && !plano){ showToast("Preencha ao menos um campo do feedback."); return; }
+
+    const lider = (APP_CONFIG.lideres || []).find(l => l.nome.toLowerCase() === colaborador.toLowerCase());
+    saveFeedbackRecord({
+      id: Date.now() + "_" + Math.random().toString(36).slice(2,8),
+      loja, aplicador, colaborador, liderId: lider ? lider.id : null,
+      dataFeedback, fortes, melhorar, plano, prazoAcomp,
+      date: todayStr(),
+      savedAt: new Date().toISOString()
+    });
+    localStorage.setItem(STORAGE_PREFIX + "last_auditor", aplicador);
+    showToast("Feedback salvo!");
+    renderReunioes();
+  });
+}
+
+function htmlAcompanhamento(){
+  const lideres = lideresVisiveis().filter(l => pautasFilterLoja === "todas" || l.loja === pautasFilterLoja);
+  const prazo = APP_CONFIG.prazoAtaHoras || 24;
+  let html = htmlFiltroLoja();
+  html += `<p class="cfg-hint" style="margin:0 0 12px;">Últimos 35 dias. Prazo para lançar a ata: ${prazo}h depois do horário da reunião.</p>`;
+
+  if (!lideres.length){
+    return html + emptyState("users", "Nenhum líder cadastrado", isGerente()
+      ? "<span>Peça ao Diretor para cadastrar os líderes e os horários das reuniões em Configurações.</span>"
+      : "<span>Cadastre os líderes e os horários das reuniões em Configurações, na seção \"Líderes e reuniões\".</span>");
+  }
+
+  lideres.forEach(l => {
+    const ocs = statusAtasLider(l);
+    const cont = k => ocs.filter(o => o.status === k).length;
+    const ultimaAta = getPautas().filter(r => r.liderId === l.id).sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt))[0];
+    const feedbacks = feedbacksCache.filter(f => f.liderId === l.id).length;
+    const acoes = ultimaAta ? (ultimaAta.acoes || []).filter(a => a.acao) : [];
+
+    html += `<div class="reu-lider-card">
+      <div class="reu-lider-head">
+        <div><div class="reu-lider-nome">${escHtml(l.nome)}</div>
+        <div class="hist-meta">${escHtml(l.loja)} · ${escHtml(descAgendaLider(l))}</div></div>
+      </div>
+      <div class="hist-badges">
+        <span class="hist-badge">Esperadas: ${ocs.length}</span>
+        <span class="hist-badge good">No prazo: ${cont("prazo")}</span>
+        <span class="hist-badge reu-warn">Com atraso: ${cont("atrasada")}</span>
+        <span class="hist-badge reu-bad">Não lançadas: ${cont("faltando")}</span>
+        <span class="hist-badge">Feedbacks recebidos: ${feedbacks}</span>
+      </div>
+      <div class="reu-occ-list">
+        ${ocs.slice().reverse().map(o => `
+          <div class="reu-occ reu-${o.status}">
+            <span>${fmtDate(o.dStr)}</span>
+            <span>${STATUS_ATA_LABEL[o.status]}</span>
+            ${o.status === "faltando" ? `<button class="reu-fb-btn" data-fb-lider="${escHtml(l.id)}" data-fb-data="${o.dStr}">Registrar feedback</button>` : ""}
+          </div>`).join("") || `<div class="hist-meta">Nenhuma reunião esperada neste período.</div>`}
+      </div>
+      ${ultimaAta ? `<div class="pauta-detail" style="margin-top:10px;">
+        <div><strong>Última ata (reunião de ${fmtDate(ultimaAta.dataReuniao || ultimaAta.date)}):</strong></div>
+        <div><strong>Temas:</strong> ${escHtml(ultimaAta.assunto) || "—"}</div>
+        <div><strong>Decisões:</strong> ${escHtml(ultimaAta.decisoes) || "—"}</div>
+        ${acoes.length ? `<div><strong>Pontos de ação:</strong><ul class="reu-acoes-list">${acoes.map(a =>
+          `<li>${escHtml(a.acao)}${a.responsavel ? ` — <em>${escHtml(a.responsavel)}</em>` : ""}${a.prazo ? ` (até ${fmtDate(a.prazo)})` : ""}</li>`).join("")}</ul></div>` : ""}
+      </div>` : `<div class="hist-meta" style="margin-top:8px;">Nenhuma ata lançada por este líder ainda.</div>`}
+    </div>`;
+  });
+  return html;
+}
+
+function attachAcompanhamentoHandlers(){
+  document.querySelectorAll("[data-fb-lider]").forEach(b => b.addEventListener("click", () => {
+    const l = (APP_CONFIG.lideres || []).find(x => x.id === b.getAttribute("data-fb-lider"));
+    if (!l) return;
+    reuniaoPrefill = {
+      loja: l.loja,
+      colaborador: l.nome,
+      melhorar: `Ata da reunião de ${fmtDate(b.getAttribute("data-fb-data"))} não foi lançada no prazo.`
+    };
+    reuniaoTab = "feedbacks";
+    renderReunioes();
+  }));
+}
+
+/* ---------- PDFs para assinatura ---------- */
+function pdfDocumento(titulo, infoRows, corpoHtml, assinantes){
+  const info = infoRows.filter(r => r[1]).map(r =>
+    `<tr><td style="padding:5px 0;color:#6B7280;width:170px;">${r[0]}</td><td style="font-weight:700;">${escHtml(r[1])}</td></tr>`).join("");
+  const assin = assinantes.map(p => `
+    <div style="flex:1 1 280px;min-width:240px;padding-top:44px;">
+      <div style="border-top:1px solid #1B2233;padding-top:5px;font-size:11.5px;">
+        <strong>${escHtml(p.nome)}</strong><br><span style="color:#6B7280;">${escHtml(p.papel)}</span>
+      </div>
+    </div>`).join("");
+  document.getElementById("printArea").innerHTML = `
+    <div style="font-family:Arial,Helvetica,sans-serif;color:#1B2233;max-width:760px;margin:0 auto;padding:30px;">
+      <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #0A29B5;padding-bottom:16px;margin-bottom:20px;">
+        <img src="logo.png" style="width:52px;height:52px;border-radius:11px;">
+        <div>
+          <div style="font-size:19px;font-weight:800;">${titulo}</div>
+          <div style="font-size:12px;color:#6B7280;">Albano Supermercado</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13.5px;">${info}</table>
+      ${corpoHtml}
+      <div style="display:flex;flex-wrap:wrap;gap:0 40px;margin-top:20px;page-break-inside:avoid;">${assin}</div>
+      <p style="margin-top:32px;font-size:10.5px;color:#9AA3B2;">Documento gerado em ${new Date().toLocaleString("pt-BR")} — Falcioni Consultoria</p>
+    </div>`;
+  window.print();
+}
+function pdfSecao(titulo, texto){
+  return `<h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;margin:20px 0 8px;">${titulo}</h3>
+    <div style="font-size:12.5px;line-height:1.6;white-space:pre-wrap;min-height:34px;">${escHtml(texto) || "—"}</div>`;
+}
+
+function printAta(id){
+  const r = getPautas().find(x => x.id === id);
+  if (!r) return;
+  const nomes = (r.participantes || "").split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
+  while (nomes.length < 6) nomes.push("");
+  const cel = "padding:8px 10px;border-bottom:1px solid #C9CFDB;font-size:12.5px;";
+  const participantes = `<h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;margin:20px 0 8px;">Participantes</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#F4F5F8;"><td style="${cel}width:40px;font-weight:700;">#</td><td style="${cel}font-weight:700;">Nome</td><td style="${cel}font-weight:700;width:260px;">Assinatura</td></tr>
+      ${nomes.map((n,i) => `<tr><td style="${cel}height:30px;">${i+1}</td><td style="${cel}">${escHtml(n)}</td><td style="${cel}"></td></tr>`).join("")}
+    </table>`;
+  const acoes = (r.acoes || []).filter(a => a.acao);
+  const acoesHtml = acoes.length
+    ? `<table style="width:100%;border-collapse:collapse;">
+        <tr style="background:#F4F5F8;"><td style="${cel}font-weight:700;">Ação</td><td style="${cel}font-weight:700;width:150px;">Responsável</td><td style="${cel}font-weight:700;width:90px;">Prazo</td></tr>
+        ${acoes.map(a => `<tr><td style="${cel}">${escHtml(a.acao)}</td><td style="${cel}">${escHtml(a.responsavel)}</td><td style="${cel}">${a.prazo ? fmtDate(a.prazo) : ""}</td></tr>`).join("")}
+      </table>`
+    : `<div style="font-size:12.5px;">${escHtml(r.proximosPassos) || "—"}</div>`;
+  const corpo = participantes +
+    pdfSecao("Pauta / temas tratados", r.assunto) +
+    pdfSecao("Decisões tomadas", r.decisoes) +
+    `<h3 style="font-size:14px;border-bottom:1.5px solid #E7E9F0;padding-bottom:8px;margin:20px 0 8px;">Pontos de ação</h3>${acoesHtml}`;
+  pdfDocumento("Ata de Reunião", [
+    ["Loja", r.loja],
+    ["Tipo", TIPO_ATA_LABEL[r.tipo] || ""],
+    ["Líder da reunião", r.liderNome],
+    ["Data da reunião", fmtDate(r.dataReuniao || r.date)],
+    ["Registrada por", r.auditor],
+    ["Lançada em", `${fmtDate(r.date)} às ${fmtHora(r.savedAt)}`]
+  ], corpo, [
+    { nome: r.liderNome || "", papel: "Líder da reunião" },
+    { nome: r.auditor || "", papel: "Responsável pelo registro" }
+  ]);
+}
+
+function printFeedback(id){
+  const r = feedbacksCache.find(x => x.id === id);
+  if (!r) return;
+  const corpo = pdfSecao("Pontos fortes", r.fortes) +
+    pdfSecao("Pontos a melhorar", r.melhorar) +
+    pdfSecao("Plano de ação / combinados", r.plano);
+  pdfDocumento("Ata de Feedback", [
+    ["Loja", r.loja],
+    ["Colaborador / líder", r.colaborador],
+    ["Feedback aplicado por", r.aplicador],
+    ["Data do feedback", fmtDate(r.dataFeedback || r.date)],
+    ["Acompanhar até", r.prazoAcomp ? fmtDate(r.prazoAcomp) : ""]
+  ], corpo, [
+    { nome: r.aplicador || "", papel: "Quem aplicou o feedback" },
+    { nome: r.colaborador || "", papel: "Colaborador (ciente)" }
+  ]);
 }
 
 function printRecord(recordId){
@@ -2691,6 +3141,34 @@ function renderConfig(){
   </div>
 
   <div class="cfg-section">
+    <h3 class="cfg-heading">${icon("users",16,2)}Líderes e reuniões</h3>
+    <p class="cfg-hint">Cadastre cada líder e o horário fixo da reunião. O app usa isso para cobrar o lançamento da ata e montar o Acompanhamento.</p>
+    <div id="cfgLideresList">
+      ${(APP_CONFIG.lideres || []).map((l,i) => `
+        <div class="cfg-lider-card" data-idx="${i}">
+          <div class="cfg-gerente-row">
+            <input type="text" class="cfg-lider-nome" value="${escHtml(l.nome)}" placeholder="Nome do líder">
+            <button class="cfg-lider-del" data-idx="${i}" title="Remover líder">${icon("trash",15,2)}</button>
+          </div>
+          <select class="cfg-lider-loja">${LOJAS.map(x => `<option value="${escHtml(x)}" ${x === l.loja ? "selected" : ""}>${escHtml(x)}</option>`).join("")}</select>
+          <select class="cfg-lider-freq">
+            <option value="semanal" ${l.frequencia === "semanal" ? "selected" : ""}>Reunião semanal</option>
+            <option value="mensal" ${l.frequencia === "mensal" ? "selected" : ""}>Reunião mensal</option>
+          </select>
+          <select class="cfg-lider-dia-sem" style="${l.frequencia === "mensal" ? "display:none" : ""}">
+            ${DIAS_SEMANA.map((d,n) => `<option value="${n}" ${l.frequencia !== "mensal" && +l.dia === n ? "selected" : ""}>${d}</option>`).join("")}
+          </select>
+          <input type="number" min="1" max="28" class="cfg-lider-dia-mes" placeholder="Dia do mês (1 a 28)" value="${l.frequencia === "mensal" ? l.dia : ""}" style="${l.frequencia === "mensal" ? "" : "display:none"}">
+          <input type="time" class="cfg-lider-hora" value="${escHtml(l.hora || "14:00")}">
+        </div>`).join("")}
+    </div>
+    <button class="cfg-add-btn" id="cfgAddLider">${icon("plus",14,2.4)} Adicionar líder</button>
+    <p class="cfg-hint" style="margin-top:12px;">Prazo para lançar a ata (horas depois da reunião)</p>
+    <div class="cfg-row"><input type="number" min="1" max="720" id="cfgPrazoAta" value="${APP_CONFIG.prazoAtaHoras || 24}"></div>
+    <button class="cfg-save-btn" id="cfgSaveLideres">${icon("check",15,2.6)} Salvar líderes e prazo</button>
+  </div>
+
+  <div class="cfg-section">
     <h3 class="cfg-heading">${icon("checklist",16,2)}Itens do Checklist</h3>
     <p class="cfg-hint">Setor</p>
     <div class="cfg-tipo-tabs" id="cfgSectorTabs">
@@ -2777,6 +3255,58 @@ function attachConfigHandlers(){
         renderConfig();
       }
     });
+  });
+
+  function lerLideresDoForm(){
+    return Array.from(document.querySelectorAll(".cfg-lider-card")).map(card => {
+      const idx = +card.getAttribute("data-idx");
+      const freq = card.querySelector(".cfg-lider-freq").value;
+      const dia = freq === "mensal"
+        ? Math.min(28, Math.max(1, parseInt(card.querySelector(".cfg-lider-dia-mes").value, 10) || 1))
+        : parseInt(card.querySelector(".cfg-lider-dia-sem").value, 10);
+      return {
+        id: (APP_CONFIG.lideres[idx] && APP_CONFIG.lideres[idx].id) || "lider_" + Date.now() + "_" + idx,
+        nome: card.querySelector(".cfg-lider-nome").value.trim(),
+        loja: card.querySelector(".cfg-lider-loja").value,
+        frequencia: freq,
+        dia,
+        hora: card.querySelector(".cfg-lider-hora").value || "14:00"
+      };
+    });
+  }
+
+  document.getElementById("cfgAddLider").addEventListener("click", () => {
+    APP_CONFIG.lideres = lerLideresDoForm();
+    APP_CONFIG.lideres.push({ id: "lider_" + Date.now(), nome: "", loja: LOJAS[0], frequencia: "semanal", dia: 1, hora: "14:00" });
+    renderConfig();
+  });
+
+  document.querySelectorAll(".cfg-lider-del").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!confirm("Remover este líder? As atas e feedbacks já salvos continuam guardados.")) return;
+      APP_CONFIG.lideres = lerLideresDoForm();
+      APP_CONFIG.lideres.splice(+btn.getAttribute("data-idx"), 1);
+      renderConfig();
+    });
+  });
+
+  document.querySelectorAll(".cfg-lider-freq").forEach(sel => {
+    sel.addEventListener("change", () => {
+      const card = sel.closest(".cfg-lider-card");
+      const mensal = sel.value === "mensal";
+      card.querySelector(".cfg-lider-dia-sem").style.display = mensal ? "none" : "";
+      card.querySelector(".cfg-lider-dia-mes").style.display = mensal ? "" : "none";
+    });
+  });
+
+  document.getElementById("cfgSaveLideres").addEventListener("click", () => {
+    const lista = lerLideresDoForm();
+    if (lista.some(l => !l.nome)){ showToast("Informe o nome de todos os líderes."); return; }
+    APP_CONFIG.lideres = lista;
+    APP_CONFIG.prazoAtaHoras = Math.max(1, parseInt(document.getElementById("cfgPrazoAta").value, 10) || 24);
+    saveAppConfig();
+    showToast("Líderes e prazo salvos!", 3500);
+    renderConfig();
   });
 
   document.getElementById("cfgSaveAccess").addEventListener("click", () => {
@@ -2968,7 +3498,7 @@ function render(){
     fabSave.style.display = "none";
     sectorTabsRow.style.display = "none";
     geoStatusRow.style.display = "none";
-    renderPautas();
+    renderReunioes();
     return;
   }
 
@@ -3429,6 +3959,7 @@ initAppConfigSync();
 initChecklistDataSync();
 setupHistoricoSync();
 setupPautasSync();
+setupFeedbacksSync();
 
 if ("serviceWorker" in navigator){
   let reloadedOnce = false;
